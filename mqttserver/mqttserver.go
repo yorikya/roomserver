@@ -2,6 +2,7 @@ package mqttserver
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 
@@ -21,8 +22,9 @@ func (s *Server) GetClients() map[string]*client.Client {
 	return s.clients
 }
 
-func (s *Server) Publish(roomID string, message []byte) bool {
-	return s.mqttAdaptor.Publish(fmt.Sprintf("%sInTopic", roomID), message)
+func (s *Server) Publish(topic string, message []byte) bool {
+	log.Printf("publish message %s to topic '%s'", string(message), topic)
+	return s.mqttAdaptor.Publish(topic, message)
 }
 
 func NewServer(roomNames ...string) *Server {
@@ -51,6 +53,23 @@ func NewServer(roomNames ...string) *Server {
 				default:
 					log.Printf("'%s' is unknown action", m.Action)
 				}
+			})
+
+			s.mqttAdaptor.On(fmt.Sprintf("%sUpdateTopic", id), func(msg mqtt.Message) {
+				log.Printf("client '%s' asking for update %s", id, string(msg.Payload()))
+				m := map[string]interface{}{
+					"deviceid": "data",
+					"action":   "update",
+				}
+				b, err := json.Marshal(m)
+				if !errors.Is(err, nil) {
+					log.Printf("got error when decode json %s", err)
+					return
+				}
+				topic := fmt.Sprintf("%sUpdateTopicIn", id)
+				log.Printf("publis to topic '%s', message: %s", topic, string(b))
+				s.Publish(topic, b)
+
 			})
 		}
 	}

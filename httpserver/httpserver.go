@@ -41,7 +41,7 @@ func withServerAction(s *mqttserver.Server) func(w http.ResponseWriter, r *http.
 		}
 		b, err := json.Marshal(m)
 
-		log.Printf("bublish message to '%s', message: %s", roomID, string(b))
+		log.Printf("publish message to '%s', message: %s", roomID, string(b))
 		s.Publish(roomID, b)
 	}
 }

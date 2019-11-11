@@ -5,8 +5,11 @@
 //Client Data
 const char * roomID = "office";
 const char * clientID = "officeClient";
+//MQTT Topics
 const char * inTopic = "officeInTopic";
 const char * outTopic = "officeOutTopic";
+const char * updateTopic = "officeUpdateTopic";
+const char * updateTopicIn = "officeUpdateTopicIn";
 
 //Network data
 const char * ssid = "Danielle_2.4";
@@ -24,6 +27,8 @@ char * lightSec = "off";
 unsigned long previousMillis = 0;
 const long clientDataInterval = 5000;
 
+unsigned int dataUpdated= 0;
+
 //Serial value
 int incomingByte = 0;
 
@@ -40,14 +45,34 @@ void setup() {
   Serial.begin(115200);
 }
 
+
 void onConnectionEstablished() {
-  client.subscribe(inTopic, [] (const String & payload)  {
+  client.subscribe(updateTopicIn, [] (const String & payload)  {
     DynamicJsonDocument doc(1024);
     deserializeJson(doc, payload);
 
     const char * action = doc["action"];
     const char * deviceid  = doc["deviceid"];
-    Serial.print("get action");
+    if (strcmp(action, "update") == 0) {
+      dataUpdated = 1;
+      Serial.println("data was updated!!!!!");
+    }
+    Serial.print(updateTopicIn);
+    Serial.print(" get action ");
+    Serial.print(action);
+     Serial.print(" device-id ");
+    Serial.print(deviceid);
+    Serial.println(payload);
+  });
+
+   client.subscribe(inTopic, [] (const String & payload)  {
+    DynamicJsonDocument doc(1024);
+    deserializeJson(doc, payload);
+
+    const char * action = doc["action"];
+    const char * deviceid  = doc["deviceid"];
+    Serial.print(inTopic);
+    Serial.print(" get action ");
     Serial.print(action);
      Serial.print(" device-id ");
     Serial.print(deviceid);
@@ -59,16 +84,18 @@ void onConnectionEstablished() {
     
 void loop() {
   client.loop();
-
+  
   unsigned long currentMillis = millis();
+ 
+  if (currentMillis - previousMillis >= 1000 && dataUpdated == 0) {
+    previousMillis = currentMillis;
+    sendRequestData();
+  }
 
   if (currentMillis - previousMillis >= clientDataInterval) {
     previousMillis = currentMillis;
-
     sendClientData();
-  }
-
-  
+  }  
 }
 
 void sendClientData() {
@@ -82,6 +109,17 @@ void sendClientData() {
   char buffer[1024];
   serializeJson(msg, buffer);
   client.publish(outTopic, buffer);
-  Serial.print("send client data");
+  Serial.print("send client update data");
   Serial.println(buffer);
+}
+
+void sendRequestData() {
+    StaticJsonDocument<1024> msg;
+    msg["action"] = "update";
+    msg["in"] =  random(0, 10);
+    char buffer[1024];
+    serializeJson(msg, buffer);
+    client.publish(updateTopic, buffer);
+    Serial.print("send client request data");
+    Serial.println(buffer);  
 }
