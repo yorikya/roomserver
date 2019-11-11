@@ -32,16 +32,20 @@ func NewServer(roomNames ...string) *Server {
 	}
 
 	work := func() {
-		for k, c := range s.clients {
-			s.mqttAdaptor.On(fmt.Sprintf("%sOutTopic", k), func(msg mqtt.Message) {
-				r := client.Response{}
-				err := json.Unmarshal(msg.Payload(), &r)
+		for id, c := range s.clients {
+			s.mqttAdaptor.On(fmt.Sprintf("%sOutTopic", id), func(msg mqtt.Message) {
+				m := client.Message{}
+				err := json.Unmarshal(msg.Payload(), &m)
 				if err != nil {
 					log.Println("error:", err)
 					return
 				}
-				c.UpdateState(r)
-
+				switch m.Action {
+				case "update":
+					c.UpdateState(m)
+				default:
+					log.Printf("'%s' is unknown action")
+				}
 			})
 		}
 	}

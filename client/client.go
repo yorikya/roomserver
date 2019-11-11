@@ -7,20 +7,21 @@ type Client struct {
 	LastSeen                                                     time.Time
 }
 
-type Response struct {
+type Message struct {
 	MovementSen string `json:"movementSen"`
 	TempSen     string `json:"tempSen"`
 	AirCond     string `json:"airCond"`
 	LightMain   string `json:"lightMain"`
 	LightSec    string `json:"lightSec"`
+	Action      string `json:"action"`
 }
 
-func (c *Client) UpdateState(r Response) {
-	c.MovementSen = r.MovementSen
-	c.TempSen = r.TempSen
-	c.AirCond = r.AirCond
-	c.LightMain = r.LightMain
-	c.LightSec = r.LightSec
+func (c *Client) UpdateState(m Message) {
+	c.MovementSen = m.MovementSen
+	c.TempSen = m.TempSen
+	c.AirCond = m.AirCond
+	c.LightMain = m.LightMain
+	c.LightSec = m.LightSec
 	c.LastSeen = time.Now()
 }
 
