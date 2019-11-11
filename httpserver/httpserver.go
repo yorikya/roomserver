@@ -2,19 +2,48 @@ package httpserver
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/yorikya/roomserver/client"
 	"github.com/yorikya/roomserver/mqttserver"
 )
 
-func InitRoutes(s *mqttserver.Server) {
-	http.HandleFunc("/data", withServerData(s))
+func getURLParam(r *http.Request, key string) (string, error) {
+	keys, ok := r.URL.Query()[key]
+	if !ok || len(keys[0]) < 1 {
+		return "", fmt.Errorf("Url Param '%s' is missing", key)
+	}
+	return keys[0], nil
+}
 
-	// This works and strip "/static/" fragment from path
-	fs := http.FileServer(http.Dir("static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
+func withServerAction(s *mqttserver.Server) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// url example http://localhost:3000/action?roomid=office&deviceid=AC&action=on
+		roomID, err := getURLParam(r, "roomid")
+		if err != nil {
+			log.Println(err)
+			fmt.Fprintln(w, err)
+			return
+		}
+		deviceID, err := getURLParam(r, "deviceid")
+		if err != nil {
+			log.Println(err)
+			fmt.Fprintln(w, err)
+			return
+		}
+		action, err := getURLParam(r, "action")
 
+		m := map[string]string{
+			"deviceid": deviceID,
+			"action":   action,
+		}
+		b, err := json.Marshal(m)
+
+		log.Printf("bublish message to '%s', message: %s", roomID, string(b))
+		s.Publish(roomID, b)
+	}
 }
 
 func withServerData(s *mqttserver.Server) func(w http.ResponseWriter, r *http.Request) {
@@ -32,4 +61,14 @@ func withServerData(s *mqttserver.Server) func(w http.ResponseWriter, r *http.Re
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(js)
 	}
+}
+
+func InitRoutes(s *mqttserver.Server) {
+	http.HandleFunc("/data", withServerData(s))
+	http.HandleFunc("/action", withServerAction(s))
+
+	// This works and strip "/static/" fragment from path
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+
 }

@@ -21,6 +21,10 @@ func (s *Server) GetClients() map[string]*client.Client {
 	return s.clients
 }
 
+func (s *Server) Publish(roomID string, message []byte) bool {
+	return s.mqttAdaptor.Publish(fmt.Sprintf("%sInTopic", roomID), message)
+}
+
 func NewServer(roomNames ...string) *Server {
 	s := &Server{
 		mqttAdaptor: mqtt.NewAdaptor("tcp://0.0.0.0:1883", "roomserve"),
@@ -34,7 +38,7 @@ func NewServer(roomNames ...string) *Server {
 	work := func() {
 		for id, c := range s.clients {
 			s.mqttAdaptor.On(fmt.Sprintf("%sOutTopic", id), func(msg mqtt.Message) {
-				m := client.Message{}
+				m := client.OutMessage{}
 				err := json.Unmarshal(msg.Payload(), &m)
 				if err != nil {
 					log.Println("error:", err)
@@ -42,9 +46,10 @@ func NewServer(roomNames ...string) *Server {
 				}
 				switch m.Action {
 				case "update":
+					log.Printf("client '%s' update state: %+v", id, m)
 					c.UpdateState(m)
 				default:
-					log.Printf("'%s' is unknown action")
+					log.Printf("'%s' is unknown action", m.Action)
 				}
 			})
 		}
