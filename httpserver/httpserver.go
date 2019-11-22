@@ -35,14 +35,8 @@ func withServerAction(s *mqttserver.Server) func(w http.ResponseWriter, r *http.
 		}
 		action, err := getURLParam(r, "action")
 
-		m := map[string]string{
-			"deviceid": deviceID,
-			"action":   action,
-		}
-		b, err := json.Marshal(m)
-
-		log.Printf("publish message to '%s', message: %s", roomID, string(b))
-		s.Publish(roomID, b)
+		s.Publish(fmt.Sprintf("%sInTopic", roomID), []byte(fmt.Sprintf("/%s/%s", deviceID, action)))
+		log.Printf("get an request, room-id: %s, device-id: %s, action: %s", roomID, deviceID, action)
 	}
 }
 

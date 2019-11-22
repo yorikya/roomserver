@@ -1,10 +1,10 @@
-
 #include <ArduinoJson.h>
 #include "EspMQTTClient.h"
 
 //Client Data
 const char * roomID = "office";
 const char * clientID = "officeClient";
+//Topic names
 const char * inTopic = "officeInTopic";
 const char * outTopic = "officeOutTopic";
 const char * updateTopic = "officeUpdateTopic";
@@ -26,10 +26,7 @@ StaticJsonDocument<1024> client_data;
 
 //Process Sheduling
 unsigned long previousMillis = 0;
-const long clientDataInterval = 5000;
-
-//Serial value
-int incomingByte = 0;
+const long clientDataInterval = 60000;
 
 EspMQTTClient client(
   ssid,
@@ -95,6 +92,7 @@ void loop() {
     previousMillis = currentMillis;
     sendClientData();
   }
+
   
 }
 

@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	s := mqttserver.NewServer("office")
+	s := mqttserver.NewServer("room1")
 	go s.Start()
 	defer s.Close()
 
