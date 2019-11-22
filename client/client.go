@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/smira/go-statsd"
@@ -20,18 +21,51 @@ const (
 	dht         = "dht"
 	humidity    = "Humidity"
 	temperature = "Temperature"
+
+	//Movement sensor
+	movesensor = "movesensor"
 )
 
 type Client struct {
-	ClientID, MovementSen, AirCond, LightMain, LightSec string
-	Humidity, Temperature                               float64
-	LastSeen                                            time.Time
-	stats                                               *statsd.Client
+	ClientID, AirCond, LightMain, LightSec string
+	Humidity, Temperature                  float64
+	MovementSen                            int64
+	LastSeen                               time.Time
+	stats                                  *statsd.Client
+	mu                                     *sync.Mutex
 }
 
-func (c *Client) Update(msg IncomingMessage) {
-	//msg.origMsg: hdt/Humidity/30.40
-	c.stats.Incr("metrics", 1)
+func (c *Client) update(msg IncomingMessage) {
+	switch msg.GetDeviceID() {
+	case dht:
+		val, err := strconv.ParseFloat(msg.GetSensorValue(), 64)
+		if err != nil {
+			log.Printf("error parse float in update client %s\n", err)
+			return
+		}
+		switch msg.GetSensorName() {
+		case humidity:
+			c.mu.Lock()
+			c.Humidity = val
+			c.mu.Unlock()
+		case temperature:
+			c.mu.Lock()
+			c.Temperature = val
+			c.mu.Unlock()
+		}
+	case movesensor:
+		n, err := strconv.ParseInt(msg.GetSensorValue(), 10, 64)
+		if err != nil {
+			log.Printf("failed parse int in update client function, %s", err)
+			return
+		}
+		c.mu.Lock()
+		c.MovementSen = n
+		c.mu.Unlock()
+	}
+}
+
+func (c *Client) sendDeviceStats(msg IncomingMessage) {
 	switch msg.GetDeviceID() {
 	case dht:
 		val, err := strconv.ParseFloat(msg.GetSensorValue(), 64)
@@ -40,24 +74,27 @@ func (c *Client) Update(msg IncomingMessage) {
 			return
 		}
 		c.stats.FGauge(fmt.Sprintf("%s.%s", msg.GetDeviceID(), msg.GetSensorName()), val)
-		switch msg.GetSensorName() {
-		case humidity:
-			c.Humidity = val
-		case temperature:
-			c.Temperature = val
-		default:
-			log.Printf("'%s' is uknown sensor name\n", msg.GetSensorName())
+	case movesensor:
+		n, err := strconv.ParseInt(msg.GetSensorValue(), 10, 64)
+		if err != nil {
+			log.Printf("failed parse int in send stats client function, %s", err)
+			return
 		}
-	default:
-		c.stats.Incr("device.unknown", 1)
-		log.Printf("'%s' is unknown device", msg.GetDeviceID())
-
+		c.stats.Gauge(msg.GetDeviceID(), n)
 	}
+}
+
+func (c *Client) Update(msg IncomingMessage) {
+	//msg.origMsg: hdt/Humidity/30.40
+	c.stats.Incr("metrics", 1)
+	c.update(msg)
+	c.sendDeviceStats(msg)
 
 }
 
 func NewClient(clientID string) *Client {
 	return &Client{
+		mu:       &sync.Mutex{},
 		ClientID: clientID,
 		stats:    statsd.NewClient("localhost:8125", statsd.MaxPacketSize(1400), statsd.MetricPrefix(fmt.Sprintf("home.%s.", clientID))),
 	}

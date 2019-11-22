@@ -1,35 +1,32 @@
-
-#include <ArduinoJson.h>
 #include "EspMQTTClient.h"
 
 //Client Data
-const char * roomID = "office";
-const char * clientID = "officeClient";
-const char * inTopic = "officeInTopic";
-const char * outTopic = "officeOutTopic";
-const char * updateTopic = "officeUpdateTopic";
-const char * updateTopicIn = "officeUpdateTopicIn";
+const char * roomID = "room1";
+const char * clientID = "room1Client";
+//Topic names
+const char * inTopic = "room1InTopic";
+const char * outTopic = "room1OutTopic";
 
 //Network data
 const char * ssid = "Danielle_2.4";
 const char * wifipass = "0524713014";
 const char * serverip = "10.0.0.2";
 
-//Sensors
-char * movementSen = "78.8";
-char * tempSen = "26.6";
-char * airCond = "on";
-char * lightMain = "on";
-char * lightSec = "off";
+//Movement Sensor
+int movesensor = 5;              // the pin that the sensor is atteched to
 
-StaticJsonDocument<1024> client_data;
+
+//Libraries
+#include <DHT.h>;
+
+//Constants
+#define DHTPIN 4     // what pin we're connected to
+#define DHTTYPE DHT22   // DHT 22  (AM2302)
+DHT dht(DHTPIN, DHTTYPE, 11); //// Initialize DHT sensor for normal 16mhz Arduino
 
 //Process Sheduling
 unsigned long previousMillis = 0;
 const long clientDataInterval = 5000;
-
-//Serial value
-int incomingByte = 0;
 
 EspMQTTClient client(
   ssid,
@@ -41,43 +38,19 @@ EspMQTTClient client(
 );
 
 void setup() {
+  dht.begin();
+  pinMode(movesensor, INPUT);    // initialize sensor as an input
   Serial.begin(115200);
-  client_data["updated"] = false;
 }
 
 
 void onConnectionEstablished() {
-  client.subscribe(updateTopicIn, [] (const String & payload)  {
-    DynamicJsonDocument doc(1024);
-    deserializeJson(doc, payload);
-
-    const char * action = doc["action"];
-    const char * deviceid  = doc["deviceid"];
-    if (strcmp(action, "update") == 0) {
-      client_data["updated"] = true;
-      Serial.println("data was updated!!!!!");
-    }
-    Serial.print(updateTopicIn);
-    Serial.print(" get action ");
-    Serial.print(action);
-     Serial.print(" device-id ");
-    Serial.print(deviceid);
+  client.subscribe(inTopic, [] (const String & payload)  {
+    
+    Serial.print("get data in-topic: ");
     Serial.println(payload);
   });
 
-   client.subscribe(inTopic, [] (const String & payload)  {
-    DynamicJsonDocument doc(1024);
-    deserializeJson(doc, payload);
-
-    const char * action = doc["action"];
-    const char * deviceid  = doc["deviceid"];
-    Serial.print(inTopic);
-    Serial.print(" get action ");
-    Serial.print(action);
-     Serial.print(" device-id ");
-    Serial.print(deviceid);
-    Serial.println(payload);
-  });
 
 }
 
@@ -86,40 +59,18 @@ void loop() {
   client.loop();
   unsigned long currentMillis = millis();
 
-  if (client_data["updated"] == false && currentMillis - previousMillis >= 1000) {
-    previousMillis = currentMillis;
-    sendRequestData();
-  }
 
   if (currentMillis - previousMillis >= clientDataInterval) {
     previousMillis = currentMillis;
-    sendClientData();
+    String deviceid = "/dht/"; 
+
+    client.publish(outTopic, deviceid + "Humidity/" + String(dht.readHumidity()).c_str());
+    client.publish(outTopic, deviceid + "Temperature/" + String(dht.readTemperature()).c_str());
+
+    client.publish(outTopic, "/movesensor/state/" + String(digitalRead(movesensor)));
+    Serial.println(digitalRead(movesensor));
+    
+    Serial.println("send client dht sensor data, move senso");
   }
   
-}
-
-void sendClientData() {
-  StaticJsonDocument<1024> msg;
-  msg["movementSen"] = movementSen;
-  msg["tempSen"] = tempSen;
-  msg["airCond"] = airCond;
-  msg["lightMain"] = lightMain;
-  msg["lightSec"] = lightSec;
-  msg["action"] = "update";
-  char buffer[1024];
-  serializeJson(msg, buffer);
-  client.publish(outTopic, buffer);
-  Serial.print("send client update data");
-  Serial.println(buffer);
-}
-
-void sendRequestData() {
-    StaticJsonDocument<1024> msg;
-    msg["action"] = "update";
-    msg["in"] =  random(0, 10);
-    char buffer[1024];
-    serializeJson(msg, buffer);
-    client.publish(updateTopic, buffer);
-    Serial.print("send client request data");
-    Serial.println(buffer);  
 }
