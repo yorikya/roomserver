@@ -8,6 +8,7 @@ import (
 	"gobot.io/x/gobot/platforms/mqtt"
 
 	"github.com/yorikya/roomserver/client"
+	"github.com/yorikya/roomserver/devices"
 )
 
 type Server struct {
@@ -31,7 +32,10 @@ func NewServer(roomNames ...string) *Server {
 		clients:     make(map[string]*client.Client),
 	}
 	for _, roomName := range roomNames {
-		s.clients[roomName] = client.NewClient(roomName)
+		s1 := devices.NewHDTSensor("Humidity")
+		s2 := devices.NewHDTSensor("Temperature")
+		s3 := devices.NewMovementSensor("state")
+		s.clients[roomName] = client.NewClient(roomName, s1, s2, s3)
 		log.Printf("client: %s was added, data: %+v\n", roomName, s.clients[roomName])
 	}
 
