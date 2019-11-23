@@ -8,6 +8,7 @@ import (
 	"gobot.io/x/gobot/platforms/mqtt"
 
 	"github.com/yorikya/roomserver/client"
+	"github.com/yorikya/roomserver/config"
 	"github.com/yorikya/roomserver/devices"
 )
 
@@ -31,11 +32,16 @@ func NewServer(roomNames ...string) *Server {
 		mqttAdaptor: mqtt.NewAdaptor("tcp://0.0.0.0:1883", "serve"),
 		clients:     make(map[string]*client.Client),
 	}
+	cfgRooms, err := config.ParseRooms("config/rooms.json")
+	if err != nil {
+		log.Printf("failed parse file %s", err)
+	}
 	for _, roomName := range roomNames {
-		s1 := devices.NewHDTSensor("Humidity")
-		s2 := devices.NewHDTSensor("Temperature")
-		s3 := devices.NewMovementSensor("state")
-		s.clients[roomName] = client.NewClient(roomName, s1, s2, s3)
+		roomCfg := cfgRooms.GetRoom(roomName)
+		if roomCfg == nil {
+			continue
+		}
+		s.clients[roomName] = client.NewClient(roomName, devices.NewDevices(roomCfg)...)
 		log.Printf("client: %s was added, data: %+v\n", roomName, s.clients[roomName])
 	}
 

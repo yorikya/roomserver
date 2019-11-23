@@ -1,0 +1,12 @@
+{
+    "rooms": [
+      {
+        "name": "room1",
+        "sensors": [
+            {"id":"dht", "name":"Humidity"},
+            {"id":"dht", "name":"Temperature"},
+            {"id":"movesensor", "name":"state"}
+        ]
+      }
+    ]
+  }

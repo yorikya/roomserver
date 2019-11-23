@@ -3,8 +3,8 @@ package client
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
+
 	"sync"
 	"time"
 
@@ -17,73 +17,14 @@ const (
 	device = iota + 1
 	sensor
 	value
-
-	//DHT22 sensor
-	dht         = "dht"
-	humidity    = "Humidity"
-	temperature = "Temperature"
-
-	//Movement sensor
-	movesensor = "movesensor"
 )
 
 type Client struct {
 	ClientID, AirCond, LightMain, LightSec string
-	humidity, temperature                  float64
-	MovementSen                            int64
 	LastSeen                               time.Time
 	stats                                  *statsd.Client
 	mu                                     *sync.Mutex
 	sensors                                []devices.Sensor
-}
-
-func (c *Client) update(msg IncomingMessage) {
-	switch msg.GetDeviceID() {
-	case dht:
-		val, err := strconv.ParseFloat(msg.GetSensorValue(), 64)
-		if err != nil {
-			log.Printf("error parse float in update client %s\n", err)
-			return
-		}
-		switch msg.GetSensorName() {
-		case humidity:
-			c.mu.Lock()
-			c.humidity = val
-			c.mu.Unlock()
-		case temperature:
-			c.mu.Lock()
-			c.temperature = val
-			c.mu.Unlock()
-		}
-	case movesensor:
-		n, err := strconv.ParseInt(msg.GetSensorValue(), 10, 64)
-		if err != nil {
-			log.Printf("failed parse int in update client function, %s", err)
-			return
-		}
-		c.mu.Lock()
-		c.MovementSen = n
-		c.mu.Unlock()
-	}
-}
-
-func (c *Client) sendDeviceStats(msg IncomingMessage) {
-	switch msg.GetDeviceID() {
-	case dht:
-		val, err := strconv.ParseFloat(msg.GetSensorValue(), 64)
-		if err != nil {
-			log.Printf("error parse float in OutTopic %s\n", err)
-			return
-		}
-		c.stats.FGauge(fmt.Sprintf("%s.%s", msg.GetDeviceID(), msg.GetSensorName()), val)
-	case movesensor:
-		n, err := strconv.ParseInt(msg.GetSensorValue(), 10, 64)
-		if err != nil {
-			log.Printf("failed parse int in send stats client function, %s", err)
-			return
-		}
-		c.stats.Gauge(msg.GetDeviceID(), n)
-	}
 }
 
 func (c *Client) Update(msg IncomingMessage) {
@@ -106,7 +47,7 @@ func (c *Client) getSensor(id, name string) devices.Sensor {
 }
 
 func NewClient(clientID string, s ...devices.Sensor) *Client {
-	log.Printf("Create a new client '%s', sensors %s \n", clientID, s)
+	log.Printf("Create a new client '%s'n", clientID)
 	return &Client{
 		sensors:  s,
 		mu:       &sync.Mutex{},
