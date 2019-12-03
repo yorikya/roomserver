@@ -57,9 +57,47 @@ func withServerData(s *mqttserver.Server) func(w http.ResponseWriter, r *http.Re
 	}
 }
 
+func withServerUpdate(s *mqttserver.Server) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("get /update request: %+v\n", r)
+	}
+}
+
+func withServerAuth(s *mqttserver.Server) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("get /auth request: %+v\n", r)
+		type Device struct {
+			Name, Sensor string
+		}
+
+		type AuthResponse struct {
+			Success    bool
+			Devices    map[string]Device
+			DevicesNum int
+		}
+		devices := map[string]Device{
+			"hdtHumidity":    Device{"hdt", "Humidity"},
+			"hdtTemperature": Device{"hdt", "Temperature"},
+		}
+		resp := AuthResponse{
+			Success:    true,
+			Devices:    devices,
+			DevicesNum: len(devices),
+		}
+		b, err := json.Marshal(resp)
+		if err != nil {
+			log.Println("error:", err)
+		}
+		w.Write(b)
+		log.Printf("reponse auht: %s", string(b))
+	}
+}
+
 func InitRoutes(s *mqttserver.Server) {
 	http.HandleFunc("/data", withServerData(s))
 	http.HandleFunc("/action", withServerAction(s))
+	http.HandleFunc("/update", withServerUpdate(s))
+	http.HandleFunc("/auth", withServerAuth(s))
 
 	// This works and strip "/static/" fragment from path
 	fs := http.FileServer(http.Dir("static"))

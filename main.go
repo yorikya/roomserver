@@ -10,11 +10,11 @@ import (
 func main() {
 
 	s := mqttserver.NewServer("room1")
-	go s.Start()
+	// go s.Start()
 	defer s.Close()
 
 	httpserver.InitRoutes(s)
 
-	http.ListenAndServe(":3000", nil)
+	http.ListenAndServe(":80", nil)
 
 }
