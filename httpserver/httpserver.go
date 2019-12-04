@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/yorikya/roomserver/client"
-	"github.com/yorikya/roomserver/mqttserver"
+	"github.com/yorikya/roomserver/server"
 )
 
 func getURLParam(r *http.Request, key string) (string, error) {
@@ -18,7 +18,7 @@ func getURLParam(r *http.Request, key string) (string, error) {
 	return keys[0], nil
 }
 
-func withServerAction(s *mqttserver.Server) func(w http.ResponseWriter, r *http.Request) {
+func withServerAction(s *server.Server) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// url example http://localhost:3000/action?roomid=office&deviceid=AC&action=on
 		roomID, err := getURLParam(r, "roomid")
@@ -35,12 +35,11 @@ func withServerAction(s *mqttserver.Server) func(w http.ResponseWriter, r *http.
 		}
 		action, err := getURLParam(r, "action")
 
-		s.Publish(fmt.Sprintf("%sInTopic", roomID), []byte(fmt.Sprintf("/%s/%s", deviceID, action)))
 		log.Printf("get an request, room-id: %s, device-id: %s, action: %s", roomID, deviceID, action)
 	}
 }
 
-func withServerData(s *mqttserver.Server) func(w http.ResponseWriter, r *http.Request) {
+func withServerData(s *server.Server) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		allClients := []client.Client{}
 		for _, v := range s.GetClients() {
@@ -57,13 +56,13 @@ func withServerData(s *mqttserver.Server) func(w http.ResponseWriter, r *http.Re
 	}
 }
 
-func withServerUpdate(s *mqttserver.Server) func(w http.ResponseWriter, r *http.Request) {
+func withServerUpdate(s *server.Server) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("get /update request: %+v\n", r)
 	}
 }
 
-func withServerAuth(s *mqttserver.Server) func(w http.ResponseWriter, r *http.Request) {
+func withServerAuth(s *server.Server) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("get /auth request: %+v\n", r)
 		type Device struct {
@@ -93,7 +92,7 @@ func withServerAuth(s *mqttserver.Server) func(w http.ResponseWriter, r *http.Re
 	}
 }
 
-func InitRoutes(s *mqttserver.Server) {
+func InitRoutes(s *server.Server) {
 	http.HandleFunc("/data", withServerData(s))
 	http.HandleFunc("/action", withServerAction(s))
 	http.HandleFunc("/update", withServerUpdate(s))

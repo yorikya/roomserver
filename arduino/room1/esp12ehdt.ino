@@ -1,5 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
+#include <ArduinoJson.h>
+#include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
 
 //Client Data
@@ -10,25 +12,26 @@ const String ssID     = "Danielle_2.4";
 const String wifiPass = "0524713014";    
 
 const String serverIP = "10.0.0.4"; 
-const int serverPort = 3000;
-const String clientInfo = "--- Client Info: --- \nClientID: " + clientID + ", WiFi SSID: " + ssID + ", Main Server IP: " + serverIP+ ":" + serverPort;
+const String clientInfo = "--- Client Info: --- \nClientID: " + clientID + ", WiFi SSID: " + ssID + ", Main Server IP: " + serverIP;
 
 //Process Sheduling
 unsigned long previousMillis = 0;
 const long clientDataInterval = 5000;
 
+//Client data
+StaticJsonDocument<512> clientData;
+
+WiFiClient client;
+
+HTTPClient http;
+
+ESP8266WebServer server(80); //Server on port 80
+
 #include <DHT.h>
 #define DHTPIN 4     // what pin we're connected to
 #define DHTTYPE DHT22   // DHT 22  (AM2302)
 
-String humidityValStr;
-String temperatureValStr;
-
 DHT dht(DHTPIN, DHTTYPE, 11); //// Initialize DHT sensor for normal 16mhz Arduino
-
-WiFiClient client;
-
-ESP8266WebServer server(80); //Server on port 80
 
 // --- Logger 
 #define LOGSSIZE 50
@@ -69,10 +72,9 @@ void setup()
 {
   dht.begin();
   Serial.begin(115200);
+  Serial.setDebugOutput(true);
 
   logPrintln("Configuring access point...");
-  WiFi.disconnect();
-  delay(1);
   WiFi.mode(WIFI_STA);  
   WiFi.begin(ssID, wifiPass);             // Connect to the network
   logPrintln("Connecting to " + ssID);
@@ -87,10 +89,40 @@ void setup()
   server.on("/logs", handleLogs);      //Which routine to handle at root location
   
   server.begin();     
-  logPrintln("HTTP server started"); //Start server
+  logPrintln(clientInfo); //Start server
+  authRequest();
 }
 
- 
+void authRequest() {
+  String url = "http://" + serverIP + "/auth";
+  String resp;
+  int i;
+  while (resp == "") {
+    logPrintln("try auth attempt: " + String(++i));
+    resp = getRequest(url);
+    if (resp != "") {
+      DeserializationError error = deserializeJson(clientData, resp);
+      // Test if parsing succeeds.
+      if (error) {
+        logPrintln("auth response deserializeJson() failed:" );
+        logPrintln(error.c_str());
+        resp = "";
+        continue;
+      }
+      
+      if (clientData["Success"] == true) {
+         logPrintln("authentication success, resp:"+ resp);
+         return;
+      } 
+    }
+    
+    delay(1000);
+  }
+}
+
+String humidity;
+String temperature;
+
 void loop() 
 {
   server.handleClient();
@@ -98,17 +130,16 @@ void loop()
   
   if (currentMillis - previousMillis >= clientDataInterval) {
     previousMillis = currentMillis;
-
-    sendSensorData("hdt", "Humidity", humidityValStr);
-    sendSensorData("hdt", "Temperature", temperatureValStr);
+    
+    sendSensorData(clientData["Devices"]["hdtHumidity"]["Name"],clientData["Devices"]["hdtHumidity"]["Sensor"],String(dht.readHumidity()).c_str());
+    sendSensorData(clientData["Devices"]["hdtTemperature"]["Name"],clientData["Devices"]["hdtTemperature"]["Sensor"],String(dht.readTemperature()).c_str()); 
   } 
-  humidityValStr =  String(dht.readHumidity()).c_str();
-  temperatureValStr = String(dht.readTemperature()).c_str();
+  
 }
 
 // --- Help Functions
 void sendSensorData(String device, String sensor,String value) {
-  String url = "/update";
+  String url = "http://" + serverIP + "/update";
   url += "?device=" + device;
   url += "&sensor=" + sensor;
   url += "&value=" + value;
@@ -116,26 +147,23 @@ void sendSensorData(String device, String sensor,String value) {
 
   getRequest(url);
 }
-void getRequest(String url) {
-  if (!client.connect(serverIP, serverPort)) {
-    logPrintln("connection to: " + serverIP +":"+ String(serverPort)+" was failed");
-    return;
-  }
-  
-  client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + serverIP + "\r\n" + "Connection: close\r\n\r\n");
-  unsigned long timeout = millis();
-  while (client.available() == 0) {
-    if (millis() - timeout > 5000){ 
-      logPrintln("connect to: " + serverIP +":"+ String(serverPort)+ ", url: "+url +" >>> Client Timeout !");
-      client.stop(); 
-      return; 
-    } 
-  } // Read all the lines of the reply from server and print them to Serial
-  
-  while (client.available()){ 
-    String line = client.readStringUntil('\r'); 
-  }
-  logPrintln("GET Request, http://" + serverIP +":"+ String(serverPort)+ url + ", connection closed");
-}
 
-  
+String getRequest(String url) {
+    String payload;
+    if (http.begin(client, url)) {  // HTTP
+      int httpCode = http.GET();
+      // httpCode will be negative on error
+      if (httpCode > 0) {
+        if (httpCode == HTTP_CODE_OK) {
+          payload = http.getString();
+        }
+      } else {
+        logPrintln("[HTTP] GET... failed, url:" + url + " error:" + http.errorToString(httpCode).c_str());
+      }
+      http.end();
+      logPrintln("[HTTP] end connection to url: " + url);
+    } else {
+      logPrintln("[HTTP] Unable to connect to url: " + url);
+    }
+    return payload;
+}

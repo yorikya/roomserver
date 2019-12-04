@@ -4,13 +4,12 @@ import (
 	"net/http"
 
 	"github.com/yorikya/roomserver/httpserver"
-	"github.com/yorikya/roomserver/mqttserver"
+	"github.com/yorikya/roomserver/server"
 )
 
 func main() {
 
-	s := mqttserver.NewServer("room1")
-	// go s.Start()
+	s := server.NewServer("room1")
 	defer s.Close()
 
 	httpserver.InitRoutes(s)
