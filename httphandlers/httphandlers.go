@@ -54,6 +54,8 @@ func withServerAction(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 				if err != nil {
 					log.Printf("get an erro when send command cto client: %s, cmd: %s\n", roomID, cmd)
 				}
+
+				fmt.Fprintln(w, err)
 				log.Println("the response from client", res)
 				return
 			}
