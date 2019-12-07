@@ -9,26 +9,28 @@ const (
 	//DHT22 sensor
 	dht = "dht"
 
-	//Movement sensor
-	movesensor = "movesensor"
+	//RGB Strip
+	rgbstrip = "rgbstrip"
 )
 
-type Sensor interface {
+type Device interface {
 	GetID() string
 	GetName() string
+	GetSensor() string
 	GetValueStr() string
 	SetValue(string) error
+	CreateCMD(string) (string, error)
 	SendStats(*statsd.Client)
 }
 
-func NewDevices(roomCfg *config.Room) []Sensor {
-	sens := []Sensor{}
-	for _, sensor := range roomCfg.Sensors {
-		switch sensor.ID {
+func NewDevices(roomName string, roomCfg *config.Room) []Device {
+	sens := []Device{}
+	for _, device := range roomCfg.Devices {
+		switch device.Name {
 		case dht:
-			sens = append(sens, NewHDTSensor(sensor.Name))
-		case movesensor:
-			sens = append(sens, NewMovementSensor(sensor.Name))
+			sens = append(sens, NewHDTSensor(roomName, device.Sensor))
+		case rgbstrip:
+			sens = append(sens, NewRGBStrip(roomName, device.Sensor))
 		}
 	}
 	return sens

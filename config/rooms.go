@@ -6,14 +6,14 @@ import (
 	"os"
 )
 
-type Sensor struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type Device struct {
+	Name   string `json:"name"`
+	Sensor string `json:"sensor"`
 }
 
 type Room struct {
 	Name    string   `json:"name"`
-	Sensors []Sensor `json:"sensors"`
+	Devices []Device `json:"devices"`
 }
 
 type Rooms struct {

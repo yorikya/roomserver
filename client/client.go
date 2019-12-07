@@ -3,7 +3,6 @@ package client
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"sync"
 	"time"
@@ -12,72 +11,64 @@ import (
 	"github.com/yorikya/roomserver/devices"
 )
 
-const (
-	//IncomingMessage index
-	device = iota + 1
-	sensor
-	value
-)
-
 type Client struct {
-	ClientID, AirCond, LightMain, LightSec string
-	LastSeen                               time.Time
-	stats                                  *statsd.Client
-	mu                                     *sync.Mutex
-	sensors                                []devices.Sensor
+	ClientID, IPstr string
+	LastSeen        time.Time
+	stats           *statsd.Client
+	mu              *sync.Mutex
+	Devices         []devices.Device
 }
 
-func (c *Client) Update(msg IncomingMessage) {
-	//msg.origMsg: hdt/Humidity/30.40
-	c.stats.Incr("metrics", 1)
-	s := c.getSensor(msg.GetDeviceID(), msg.GetSensorName())
-	if s != nil {
-		s.SetValue(msg.GetSensorValue())
-		s.SendStats(c.stats)
-	}
-}
-
-func (c *Client) getSensor(id, name string) devices.Sensor {
-	for _, s := range c.sensors {
-		if s.GetID() == id && s.GetName() == name {
-			return s
-		}
-	}
-	return nil
-}
-
-func NewClient(clientID string, s ...devices.Sensor) *Client {
-	log.Printf("Create a new client '%s'n", clientID)
+func NewClient(clientID string, d ...devices.Device) *Client {
+	log.Printf("Create a new client '%s'\n", clientID)
 	return &Client{
-		sensors:  s,
+		Devices:  d,
 		mu:       &sync.Mutex{},
 		ClientID: clientID,
 		stats:    statsd.NewClient("localhost:8125", statsd.MaxPacketSize(1400), statsd.MetricPrefix(fmt.Sprintf("home.%s.", clientID))),
 	}
 }
 
-type IncomingMessage struct {
-	origMsg, delimiter string
-	msgList            []string
+func (c *Client) UpdateIPstr(ip string) {
+	log.Printf("clientID: %s, change IP from: '%s', to: '%s'\n", c.ClientID, c.IPstr, ip)
+	c.mu.Lock()
+	c.IPstr = ip
+	c.mu.Unlock()
 }
 
-func (m IncomingMessage) GetDeviceID() string {
-	return m.msgList[device]
-}
-
-func (m IncomingMessage) GetSensorName() string {
-	return m.msgList[sensor]
-}
-
-func (m IncomingMessage) GetSensorValue() string {
-	return m.msgList[value]
-}
-
-func NewIncomingMessage(msg string) IncomingMessage {
-	delimiter := "/"
-	return IncomingMessage{
-		origMsg:   msg,
-		msgList:   strings.Split(msg, delimiter),
-		delimiter: delimiter,
+func (c *Client) Update(ip, device, sensor, value string) {
+	//device, sensor, value => hdt/Humidity/30.40
+	c.stats.Incr("metrics", 1)
+	if c.IPstr != ip {
+		c.UpdateIPstr(ip)
 	}
+	c.mu.Lock()
+	c.LastSeen = time.Now()
+	c.mu.Unlock()
+
+	s := c.getSensor(device, sensor)
+	if s != nil {
+		s.SetValue(value)
+		s.SendStats(c.stats)
+		return
+	}
+	log.Printf("clientID: %s, does not has device: %s, sensor: %s", c.ClientID, device, sensor)
+}
+
+func (c *Client) getSensor(name, sensor string) devices.Device {
+	for _, d := range c.Devices {
+		if d.GetName() == name && d.GetSensor() == sensor {
+			return d
+		}
+	}
+	return nil
+}
+
+func (c *Client) GetSensorByName(name string) devices.Device {
+	for _, d := range c.Devices {
+		if d.GetName() == name {
+			return d
+		}
+	}
+	return nil
 }

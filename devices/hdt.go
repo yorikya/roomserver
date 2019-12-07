@@ -9,19 +9,28 @@ import (
 )
 
 type HDTSensor struct {
-	id       string
-	name     string
-	valueStr string
+	ID       string
+	Name     string
+	Sensor   string
+	ValueStr string
 	value    float64
 	mu       *sync.Mutex
 }
 
+func (_ *HDTSensor) CreateCMD(_ string) (string, error) {
+	return "", nil
+}
+
 func (s *HDTSensor) GetID() string {
-	return s.id
+	return s.ID
+}
+
+func (s *HDTSensor) GetSensor() string {
+	return s.Sensor
 }
 
 func (s *HDTSensor) GetName() string {
-	return s.name
+	return s.Name
 }
 
 func (s *HDTSensor) SetValue(newValstr string) error {
@@ -30,24 +39,25 @@ func (s *HDTSensor) SetValue(newValstr string) error {
 		return fmt.Errorf("NewHDTSensor SetValue error parse float %s", err)
 	}
 	s.mu.Lock()
-	s.valueStr = newValstr
+	s.ValueStr = newValstr
 	s.value = newValue
 	s.mu.Unlock()
 	return nil
 }
 
 func (s *HDTSensor) GetValueStr() string {
-	return s.valueStr
+	return s.ValueStr
 }
 
 func (s *HDTSensor) SendStats(c *statsd.Client) {
-	c.FGauge(fmt.Sprintf("%s.%s", s.id, s.name), s.value)
+	c.FGauge(fmt.Sprintf("%s.%s", s.Name, s.Sensor), s.value)
 }
 
-func NewHDTSensor(name string) *HDTSensor {
+func NewHDTSensor(id, sensor string) *HDTSensor {
 	return &HDTSensor{
-		id:   "dht",
-		name: name,
-		mu:   &sync.Mutex{},
+		ID:     id,
+		Name:   "dht",
+		Sensor: sensor,
+		mu:     &sync.Mutex{},
 	}
 }

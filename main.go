@@ -3,17 +3,17 @@ package main
 import (
 	"net/http"
 
-	"github.com/yorikya/roomserver/httpserver"
+	"github.com/yorikya/roomserver/httphandlers"
 	"github.com/yorikya/roomserver/server"
 )
 
 func main() {
 
-	s := server.NewServer("room1")
+	s := server.NewServer("room1_main", "room1_dht")
 	defer s.Close()
 
-	httpserver.InitRoutes(s)
+	httphandlers.InitRoutes(s)
 
-	http.ListenAndServe(":80", nil)
+	http.ListenAndServe(":3000", nil)
 
 }

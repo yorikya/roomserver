@@ -16,6 +16,15 @@ func (s *Server) GetClients() map[string]*client.Client {
 	return s.clients
 }
 
+func (s *Server) GetClient(name string) *client.Client {
+	c, ok := s.clients[name]
+	if !ok {
+		log.Printf("clientID '%s' does not exists\n", name)
+		return nil
+	}
+	return c
+}
+
 func NewServer(roomNames ...string) *Server {
 	s := &Server{
 		clients: make(map[string]*client.Client),
@@ -27,9 +36,10 @@ func NewServer(roomNames ...string) *Server {
 	for _, roomName := range roomNames {
 		roomCfg := cfgRooms.GetRoom(roomName)
 		if roomCfg == nil {
+			log.Printf("dosen't have config for '%s'", roomName)
 			continue
 		}
-		s.clients[roomName] = client.NewClient(roomName, devices.NewDevices(roomCfg)...)
+		s.clients[roomName] = client.NewClient(roomName, devices.NewDevices(roomName, roomCfg)...)
 		log.Printf("client: %s was added, data: %+v\n", roomName, s.clients[roomName])
 	}
 
