@@ -17,8 +17,8 @@ type HDTSensor struct {
 	mu       *sync.Mutex
 }
 
-func (_ *HDTSensor) CreateCMD(_ string) (string, error) {
-	return "", nil
+func (_ *HDTSensor) CreateCMD(cmd string) (string, string, error) {
+	return cmd, CUSTOM, nil
 }
 
 func (s *HDTSensor) GetID() string {

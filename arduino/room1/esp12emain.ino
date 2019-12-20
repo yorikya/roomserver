@@ -34,6 +34,18 @@ int khz = 38; // 38kHz carrier frequency for the NEC protocol
 
 IRsend irsend(kIrLed);  // Set the GPIO to be used to sending the message.
 
+//RGBColorStrip
+int stripR;
+int stripG;
+int stripB;
+int stripFade;
+
+//RGB Color val
+String rgbColorStrip;
+
+//IR Air Code Air Cool
+String irACAirCool;
+
 #define RED_LED 5
 #define GREEN_LED 4
 #define BLUE_LED 0
@@ -72,6 +84,14 @@ void handleLogs() {
    server.send(200, "text/plain", str);
 }
 
+void handleData() {
+  String str = String(clientInfo + "\n\n");
+  str += "RGB Color:  "+ rgbColorStrip +"\n";
+  str += "IR AC AirCool:  "+ irACAirCool +"\n";
+   
+  server.send(200, "text/plain", str);
+}
+
 int getM(int a, int b){
   if (a >= b) {
     return -1;
@@ -79,11 +99,6 @@ int getM(int a, int b){
     return 1;
   }
 }
-
-int stripR;
-int stripG;
-int stripB;
-int stripFade;
 
 void changeRGBStripColor(String cmd) {
    int ind1 = cmd.indexOf(',');  //finds location of first ,
@@ -129,6 +144,7 @@ void changeRGBStripColor(String cmd) {
     logPrintln("change rgbstrip to:"+ cmd);
 }
 
+
 void snedIRACAirCool(String cmd) {
   int pos =-1;
   uint16_t data[211] = {};
@@ -154,18 +170,23 @@ void snedIRACAirCool(String cmd) {
 void handleAction() {
   String id;
   String act;
+  String val;
   for (int i = 0; i < server.args(); i++) {
     if (server.argName(i) == "deviceid") {
       id = server.arg(i);  
     } else if (server.argName(i) == "cmd") {
       act = server.arg(i);
+    } else if (server.argName(i) == "val") {
+      val = server.arg(i);
     }
     
   } 
   logPrintln("get an action for device id:"+id);
   if (id == "rgbstrip") {
      changeRGBStripColor(act);
+     rgbColorStrip = val;
   } else if (id == "ir_ac_aircool") {
+     irACAirCool = val;
      snedIRACAirCool(act);
   }
   String message = "action id: " + id + ", cmd: " + act;
@@ -200,6 +221,7 @@ void setup()
 
   server.on("/logs", handleLogs);      //Which routine to handle at root location
   server.on("/action", handleAction);
+  server.on("/data", handleData);
   
   server.begin();     
   logPrintln(clientInfo); //Start server

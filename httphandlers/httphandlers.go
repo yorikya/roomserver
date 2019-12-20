@@ -44,20 +44,22 @@ func withServerAction(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 					fmt.Fprintln(w, err)
 					return
 				}
-				cmd, err := s.CreateCMD(action)
+				cmd, val, err := s.CreateCMD(action)
 				if err != nil {
 					log.Println(err)
 					fmt.Fprintln(w, err)
 					return
 				}
-				url := fmt.Sprintf("http://%s/action?deviceid=%s&cmd=%s", c.IPstr, deviceID, cmd)
+				url := fmt.Sprintf("http://%s/action?deviceid=%s&val=%s&cmd=%s", c.IPstr, deviceID, val, cmd)
 				log.Println("the client action url:", url)
 				res, err := http.Get(url)
 				if err != nil {
 					log.Printf("get an erro when send command cto client: %s, cmd: %s\n", roomID, cmd)
+					fmt.Fprintln(w, err)
+					return
 				}
 
-				fmt.Fprintln(w, err)
+				s.SetValue(val)
 				log.Println("the response from client", res)
 				return
 			}

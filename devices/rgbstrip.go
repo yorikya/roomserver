@@ -9,25 +9,31 @@ import (
 )
 
 var (
-	LUM_1900  = RGBColor{255, 147, 41, 50}
-	LUM_2600  = RGBColor{255, 197, 143, 50}
-	LUM_2850  = RGBColor{255, 214, 170, 50}
-	LUM_3200  = RGBColor{255, 241, 224, 50}
-	LUM_5200  = RGBColor{255, 250, 244, 50}
-	LUM_5400  = RGBColor{255, 255, 251, 50}
-	LUM_6000  = RGBColor{255, 255, 255, 50}
-	LUM_7000  = RGBColor{201, 226, 255, 50}
-	LUM_20000 = RGBColor{64, 156, 255, 50}
-
-	WHITE = RGBColor{255, 255, 255, 0}
+	stripColors = []RGBColor{
+		RGBColor{"LUM_1900", 255, 147, 41, 50},
+		RGBColor{"LUM_2600", 255, 197, 143, 50},
+		RGBColor{"LUM_2850", 255, 214, 170, 50},
+		RGBColor{"LUM_3200", 255, 241, 224, 50},
+		RGBColor{"LUM_5200", 255, 250, 244, 50},
+		RGBColor{"LUM_5400", 255, 255, 251, 50},
+		RGBColor{"LUM_6000", 255, 255, 255, 50},
+		RGBColor{"LUM_7000", 201, 226, 255, 50},
+		RGBColor{"LUM_20000", 64, 156, 255, 50},
+		RGBColor{"WHITE", 255, 255, 255, 0},
+	}
 )
 
 type RGBColor struct {
+	tag                          string
 	RColor, GColor, BColor, Fade int
 }
 
 func (c RGBColor) ToCMD() string {
 	return fmt.Sprintf("%d,%d,%d,%d", c.RColor, c.GColor, c.BColor, c.Fade)
+}
+
+func (c RGBColor) GetTag() string {
+	return c.tag
 }
 
 type RGBStrip struct {
@@ -37,31 +43,24 @@ type RGBStrip struct {
 	ValueStr string
 	value    float64
 	mu       *sync.Mutex
+	colors   []RGBColor
 }
 
-func (s *RGBStrip) CreateCMD(cmd string) (string, error) {
-	switch cmd {
-	case "1900L":
-		return LUM_1900.ToCMD(), nil
-	case "2600L":
-		return LUM_2600.ToCMD(), nil
-	case "2850L":
-		return LUM_2850.ToCMD(), nil
-	case "3200L":
-		return LUM_3200.ToCMD(), nil
-	case "5200L":
-		return LUM_5200.ToCMD(), nil
-	case "5400L":
-		return LUM_5400.ToCMD(), nil
-	case "6000L":
-		return LUM_6000.ToCMD(), nil
-	case "7000L":
-		return LUM_7000.ToCMD(), nil
-	case "20000L":
-		return LUM_20000.ToCMD(), nil
-	default:
-		return cmd, nil
+func (s *RGBStrip) getColor(tag string) (RGBColor, bool) {
+	for _, col := range s.colors {
+		if col.tag == tag {
+			return col, true
+		}
 	}
+	return RGBColor{}, false
+}
+
+func (s *RGBStrip) CreateCMD(cmd string) (string, string, error) {
+	col, ok := s.getColor(cmd)
+	if ok {
+		return col.ToCMD(), col.GetTag(), nil
+	}
+	return cmd, CUSTOM, nil
 }
 
 func (s *RGBStrip) GetID() string {
@@ -77,7 +76,9 @@ func (s *RGBStrip) GetName() string {
 }
 
 func (s *RGBStrip) SetValue(newValstr string) error {
-	log.Println("RGB SetValue need implement this function")
+	s.mu.Lock()
+	s.ValueStr = newValstr
+	s.mu.Unlock()
 	return nil
 }
 
@@ -95,5 +96,6 @@ func NewRGBStrip(id, sensor string) *RGBStrip {
 		Name:   "rgbstrip",
 		Sensor: sensor,
 		mu:     &sync.Mutex{},
+		colors: stripColors,
 	}
 }

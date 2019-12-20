@@ -6,6 +6,8 @@ import (
 )
 
 const (
+	//Custom command
+	CUSTOM = "CUSTOM"
 	//DHT22 sensor
 	dht = "dht"
 
@@ -22,7 +24,7 @@ type Device interface {
 	GetSensor() string
 	GetValueStr() string
 	SetValue(string) error
-	CreateCMD(string) (string, error)
+	CreateCMD(string) (string, string, error)
 	SendStats(*statsd.Client)
 }
 
