@@ -11,6 +11,9 @@ const (
 
 	//RGB Strip
 	rgbstrip = "rgbstrip"
+
+	//AC Air Cool IR
+	ir_ac_aircool = "ir_ac_aircool"
 )
 
 type Device interface {
@@ -31,6 +34,8 @@ func NewDevices(roomName string, roomCfg *config.Room) []Device {
 			sens = append(sens, NewHDTSensor(roomName, device.Sensor))
 		case rgbstrip:
 			sens = append(sens, NewRGBStrip(roomName, device.Sensor))
+		case ir_ac_aircool:
+			sens = append(sens, NewIRACAirCool(roomName, device.Sensor))
 		}
 	}
 	return sens

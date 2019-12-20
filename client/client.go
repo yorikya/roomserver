@@ -30,21 +30,24 @@ func NewClient(clientID string, d ...devices.Device) *Client {
 }
 
 func (c *Client) UpdateIPstr(ip string) {
-	log.Printf("clientID: %s, change IP from: '%s', to: '%s'\n", c.ClientID, c.IPstr, ip)
-	c.mu.Lock()
-	c.IPstr = ip
-	c.mu.Unlock()
+	if c.IPstr != ip {
+		log.Printf("clientID: %s, change IP from: '%s', to: '%s'\n", c.ClientID, c.IPstr, ip)
+		c.mu.Lock()
+		c.IPstr = ip
+		c.mu.Unlock()
+	}
 }
 
-func (c *Client) Update(ip, device, sensor, value string) {
+func (c *Client) Update(device, sensor, value string) {
 	//device, sensor, value => hdt/Humidity/30.40
-	c.stats.Incr("metrics", 1)
-	if c.IPstr != ip {
-		c.UpdateIPstr(ip)
-	}
+	c.stats.Incr("update", 1)
 	c.mu.Lock()
 	c.LastSeen = time.Now()
 	c.mu.Unlock()
+	if device == "keepalive" {
+		log.Println("client: ", c.ClientID, "keepalive message")
+		return
+	}
 
 	s := c.getSensor(device, sensor)
 	if s != nil {
@@ -52,7 +55,7 @@ func (c *Client) Update(ip, device, sensor, value string) {
 		s.SendStats(c.stats)
 		return
 	}
-	log.Printf("clientID: %s, does not has device: %s, sensor: %s", c.ClientID, device, sensor)
+	log.Printf("clientID: %s, does not has device: %s, sensor: %s\n", c.ClientID, device, sensor)
 }
 
 func (c *Client) getSensor(name, sensor string) devices.Device {

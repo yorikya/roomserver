@@ -59,8 +59,9 @@ func (s *RGBStrip) CreateCMD(cmd string) (string, error) {
 		return LUM_7000.ToCMD(), nil
 	case "20000L":
 		return LUM_20000.ToCMD(), nil
+	default:
+		return cmd, nil
 	}
-	return WHITE.ToCMD(), nil
 }
 
 func (s *RGBStrip) GetID() string {

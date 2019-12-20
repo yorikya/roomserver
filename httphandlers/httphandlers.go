@@ -50,7 +50,9 @@ func withServerAction(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 					fmt.Fprintln(w, err)
 					return
 				}
-				res, err := http.Get(fmt.Sprintf("http://%s/action?deviceid=%s&cmd=%s", c.IPstr, deviceID, cmd))
+				url := fmt.Sprintf("http://%s/action?deviceid=%s&cmd=%s", c.IPstr, deviceID, cmd)
+				log.Println("the client action url:", url)
+				res, err := http.Get(url)
 				if err != nil {
 					log.Printf("get an erro when send command cto client: %s, cmd: %s\n", roomID, cmd)
 				}
@@ -100,6 +102,7 @@ func withServerUpdate(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 		}
 
 		if c := s.GetClient(clientid); c != nil {
+			c.UpdateIPstr(cutClientIP(r.RemoteAddr))
 			device, err := getURLParam(r, "device")
 			if err != nil {
 				log.Println(err)
@@ -118,8 +121,8 @@ func withServerUpdate(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 				fmt.Fprintln(w, err)
 				return
 			}
-			ip := cutClientIP(r.RemoteAddr)
-			c.Update(ip, device, sensor, value)
+
+			c.Update(device, sensor, value)
 			return
 		}
 		err = fmt.Errorf("server dos not have clientID: %s", clientid)

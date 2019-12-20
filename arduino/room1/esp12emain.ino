@@ -3,6 +3,8 @@
 #include <ArduinoJson.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
 
 //Client Data
 const String roomID = "room1";
@@ -16,7 +18,7 @@ const String clientInfo = "--- Client Info: --- \nClientID: " + clientID + ", Wi
 
 //Process Sheduling
 unsigned long previousMillis = 0;
-const long clientDataInterval = 5000;
+const long clientDataInterval = 10000;
 
 //Client data
 StaticJsonDocument<512> clientData;
@@ -27,6 +29,10 @@ HTTPClient http;
 
 ESP8266WebServer server(80); //Server on port 80
 
+const uint16_t kIrLed = 4;  // ESP8266 GPIO pin to use. Recommended: 4 (D2).
+int khz = 38; // 38kHz carrier frequency for the NEC protocol
+
+IRsend irsend(kIrLed);  // Set the GPIO to be used to sending the message.
 
 #define RED_LED 5
 #define GREEN_LED 4
@@ -95,7 +101,7 @@ void changeRGBStripColor(String cmd) {
    stripR = rcolor.toInt();
    stripG = gcolor.toInt();
    stripB = bcolor.toInt();
-   stripFade = fade;
+   stripFade = fade.toInt();
 
     int m = getM(tmpR ,stripR);
     int iter = (stripR - tmpR ) * m;
@@ -120,6 +126,29 @@ void changeRGBStripColor(String cmd) {
        tmpB += m;
        delay(10);
     }
+    logPrintln("change rgbstrip to:"+ cmd);
+}
+
+void snedIRACAirCool(String cmd) {
+  int pos =-1;
+  uint16_t data[211] = {};
+  uint16_t dataCnt =0;
+  String val;
+  int indx = cmd.indexOf(',') ; 
+
+  while(indx != -1 ){
+     val = cmd.substring(pos + 1, indx);
+     pos = indx;
+     indx = cmd.indexOf(',', indx +1);
+     data[dataCnt] = val.toInt();
+     dataCnt++; 
+  }
+  data[dataCnt] = cmd.substring(pos + 1, cmd.length()).toInt();
+  dataCnt++;
+  logPrintln("ir_ac_aircool get data length: " + String(dataCnt) + ", ir code: " + cmd);
+  
+  irsend.sendRaw(data, dataCnt, khz);  // Send a raw data capture at 38kHz.
+  delay(3000);
 }
 
 void handleAction() {
@@ -133,8 +162,11 @@ void handleAction() {
     }
     
   } 
+  logPrintln("get an action for device id:"+id);
   if (id == "rgbstrip") {
      changeRGBStripColor(act);
+  } else if (id == "ir_ac_aircool") {
+     snedIRACAirCool(act);
   }
   String message = "action id: " + id + ", cmd: " + act;
   logPrintln(message);
@@ -151,7 +183,8 @@ void setup()
   pinMode(GREEN_LED, OUTPUT);
   pinMode(RED_LED, OUTPUT);
   pinMode(BLUE_LED, OUTPUT);
-    
+
+  irsend.begin();
 
   logPrintln("Configuring access point...");
   WiFi.mode(WIFI_STA);  
@@ -208,11 +241,9 @@ void loop()
   if (currentMillis - previousMillis >= clientDataInterval) {
     previousMillis = currentMillis;
 
-    logPrintln("5 sec pass...");
-//    analogWrite(RED_LED, 255);   // 1900 Luminate6
-//    analogWrite(GREEN_LED, 147); 
-//    analogWrite(BLUE_LED, 41);
-//    
+    sendSensorData("keepalive", "client_status", "avelible");
+    logPrintln("send keep a live message");
+       
     } 
   
 }

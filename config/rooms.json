@@ -10,7 +10,8 @@
       {
         "name": "room1_main",
         "devices": [ 
-          {"name":"rgbstrip", "sensor":"rgb"}
+          {"name":"rgbstrip", "sensor":"rgb"},
+          {"name":"ir_ac_aircool", "sensor":"ir"}
          ]
       }
     ]
