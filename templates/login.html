@@ -1,0 +1,14 @@
+{{ template "header.html" . }}
+<form action="/login" method="post">
+    <div class="form-group">
+        <label for="InputEmail1">Email address</label>
+        <input type="text" class="form-control" name="username" placeholder="User Name">
+    </div>
+    <div class="form-group">
+        <label for="InputPassword">Password</label>
+        <input type="password" class="form-control" name="password" placeholder="Password">
+    </div>
+    
+    <button type="submit" class="btn btn-default">Submit</button>
+</form>
+{{ template "footer.html" . }}

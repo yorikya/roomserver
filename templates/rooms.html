@@ -1,0 +1,16 @@
+{{ template "header.html" . }}
+
+    <select class="form-control" id="select_room">
+        {{range .}}
+             <option name="{{.ClientID}}">{{.ClientID}}</option>
+        {{end}}
+    </select>
+    
+   <button onclick="selectRoom()" type="submit" class="btn btn-default">Select</button>
+   <script>
+        var selectOption = $( "#select_room" );
+        function selectRoom() {
+            window.location.replace("/room?name="+selectOption.val());
+        }   
+   </script>
+{{ template "footer.html" . }}

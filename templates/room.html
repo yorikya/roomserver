@@ -1,0 +1,89 @@
+{{ template "header.html" . }}
+
+<div class="row">
+    <div style="background-color:#F5F5DC; color:#000000; border: 4px solid black;" class="col-md-6">
+            <u><h1>DHT Sensor</h1></u>
+            </br>
+            <h2>Humuduty:</h2>
+            <h2 class="text-success">45.6<h2>      
+            <h2>Temperture:</h2>
+            <h2 class="text-success">23.3</h2>
+            </br>
+            </br>
+    </div>
+    <div  style="background-color:#F5F5DC; color:#000000; border: 4px solid black;" class="col-md-6">
+            <u><h1>RGB Strip Color</h1></u>
+            </br>
+            <h2>RGB Color:</h2>
+            <h2 class="text-info">LUM_1900</h2>
+            
+            <label for="RGBColor tag">RGB Tag</label>
+            <select class="form-control">
+                <option>LUM_1900</option>
+                <option>LUM_2600</option>
+                <option>LUM_2850</option>
+                <option>LUM_3200</option>
+                <option>LUM_5200</option>
+                <option>LUM_5400</option>
+                <option>LUM_6000</option>
+                <option>LUM_7000</option>
+                <option>LUM_20000</option>
+                <option>WHITE</option>
+            </select>
+            </br>
+                <button type="button" class="btn btn-primary">Send</button>
+            </br>
+    </div>
+</div>
+<div class="row">
+    <div style="background-color:#F5F5DC; color:#000000; border: 4px solid black;" class="col-md-6">
+        <u><h1>Air Conditioner</h1></u>
+        </br>
+        <h2>Mode: COOL</h2>
+        <h2>Temperture: 26</h2>
+         </br>
+
+        <label for="AC mode">Mode</label>
+        <select class="form-control">
+            <option>HEAT</option>
+            <option>COOL</option>
+            <option>CLEAN</option>
+            <option>COND</option>
+            <option>OFF</option>
+        </select>
+        </br>
+        <label for="AC temp">Temp</label>
+        <select class="form-control">
+            <option>16</option>
+            <option>17</option>
+            <option>18</option>
+            <option>19</option>
+            <option>20</option>
+            <option>21</option>
+            <option>22</option>
+            <option>23</option>
+            <option>24</option>
+            <option>25</option>
+            <option>26</option>
+            <option>27</option>
+            <option>28</option>
+            <option>29</option>
+            <option>30</option>
+            <option>31</option>
+            <option>32</option>
+        </select>
+        </br>
+            <button type="button" class="btn btn-primary">Send</button>
+        </br>
+        
+    </div>
+</div>
+
+   <!-- <button onclick="selectRoom()" type="submit" class="btn btn-default">Select</button>
+   <script>
+        var selectOption = $( "#select_room" );
+        function selectRoom() {
+            window.location.replace("/room?name="+selectOption.val());
+        }   
+   </script> -->
+{{ template "footer.html" . }}

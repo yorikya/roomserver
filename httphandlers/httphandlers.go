@@ -6,11 +6,15 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"text/template"
 
 	"github.com/yorikya/roomserver/client"
 	"github.com/yorikya/roomserver/devices"
 	"github.com/yorikya/roomserver/server"
 )
+
+//HTML Tmplates directory
+var templates = template.Must(template.ParseGlob("templates/*"))
 
 func getURLParam(r *http.Request, key string) (string, error) {
 	keys, ok := r.URL.Query()[key]
@@ -85,6 +89,46 @@ func withServerData(s *server.Server) func(w http.ResponseWriter, r *http.Reques
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(js)
+	}
+}
+
+func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("/room request: %+v", r)
+
+		err := templates.ExecuteTemplate(w, "room.html", nil) //execute the template and pass it the HomePageVars struct to fill in the gaps
+		if err != nil {                                       // if there is an error
+			log.Print("template executing error: ", err) //log it
+		}
+	}
+}
+
+func withServerRooms(s *server.Server) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		err := templates.ExecuteTemplate(w, "rooms.html", s.GetClients()) //execute the template and pass it the HomePageVars struct to fill in the gaps
+		if err != nil {                                                   // if there is an error
+			log.Print("template executing error: ", err) //log it
+		}
+
+	}
+}
+
+func serverLogin(w http.ResponseWriter, r *http.Request) {
+	log.Printf("get login request: %+v", r)
+	if r.Method == "GET" {
+
+		err := templates.ExecuteTemplate(w, "login.html", nil) //execute the template and pass it the HomePageVars struct to fill in the gaps
+		if err != nil {                                        // if there is an error
+			log.Print("template executing error: ", err) //log it
+		}
+
+	} else {
+		r.ParseForm()
+		// logic part of log in
+		fmt.Println("username:", r.Form["username"])
+		fmt.Println("password:", r.Form["password"])
+		http.Redirect(w, r, "/rooms", http.StatusSeeOther)
 	}
 }
 
@@ -187,10 +231,16 @@ func withServerAuth(s *server.Server) func(w http.ResponseWriter, r *http.Reques
 }
 
 func InitRoutes(s *server.Server) {
-	http.HandleFunc("/data", withServerData(s))
-	http.HandleFunc("/action", withServerAction(s))
 	http.HandleFunc("/update", withServerUpdate(s))
 	http.HandleFunc("/auth", withServerAuth(s))
+
+	//User URL
+	http.HandleFunc("/data", withServerData(s))
+	http.HandleFunc("/action", withServerAction(s))
+
+	http.HandleFunc("/login", serverLogin)
+	http.HandleFunc("/rooms", withServerRooms(s))
+	http.HandleFunc("/room", withServerSelectRoom(s))
 
 	// This works and strip "/static/" fragment from path
 	fs := http.FileServer(http.Dir("static"))
