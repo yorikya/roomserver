@@ -53,11 +53,22 @@ func (s *HDTSensor) SendStats(c *statsd.Client) {
 	c.FGauge(fmt.Sprintf("%s.%s", s.Name, s.Sensor), s.value)
 }
 
-func NewHDTSensor(id, sensor string) *HDTSensor {
+func NewDHTHumiditySensor(id, sensor string) *HDTSensor {
 	return &HDTSensor{
-		ID:     id,
-		Name:   "dht",
-		Sensor: sensor,
-		mu:     &sync.Mutex{},
+		ID:       id,
+		Name:     "dht_Humidity",
+		Sensor:   sensor,
+		mu:       &sync.Mutex{},
+		ValueStr: "UNSET",
+	}
+}
+
+func NewDHTTemperatureSensor(id, sensor string) *HDTSensor {
+	return &HDTSensor{
+		ID:       id,
+		Name:     "dht_Temperature",
+		Sensor:   sensor,
+		mu:       &sync.Mutex{},
+		ValueStr: "UNSET",
 	}
 }

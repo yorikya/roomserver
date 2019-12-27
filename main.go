@@ -1,8 +1,8 @@
 package main
 
 import (
-	"net/http"
 	"log"
+	"net/http"
 
 	"github.com/yorikya/roomserver/httphandlers"
 	"github.com/yorikya/roomserver/server"
@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	s := server.NewServer("room1_main", "room1_dht")
+	s := server.NewServer("room1_main")
 	defer s.Close()
 
 	httphandlers.InitRoutes(s)

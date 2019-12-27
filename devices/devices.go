@@ -9,7 +9,8 @@ const (
 	//Custom command
 	CUSTOM = "CUSTOM"
 	//DHT22 sensor
-	dht = "dht"
+	dht_Humidity    = "dht_Humidity"
+	dht_Temperature = "dht_Temperature"
 
 	//RGB Strip
 	rgbstrip = "rgbstrip"
@@ -32,8 +33,10 @@ func NewDevices(roomName string, roomCfg *config.Room) []Device {
 	sens := []Device{}
 	for _, device := range roomCfg.Devices {
 		switch device.Name {
-		case dht:
-			sens = append(sens, NewHDTSensor(roomName, device.Sensor))
+		case dht_Humidity:
+			sens = append(sens, NewDHTHumiditySensor(roomName, device.Sensor))
+		case dht_Temperature:
+			sens = append(sens, NewDHTTemperatureSensor(roomName, device.Sensor))
 		case rgbstrip:
 			sens = append(sens, NewRGBStrip(roomName, device.Sensor))
 		case ir_ac_aircool:

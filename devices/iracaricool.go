@@ -244,5 +244,6 @@ func NewIRACAirCool(id, sensor string) *IRACAirCool {
 		Sensor: sensor,
 		mu:     &sync.Mutex{},
 		codes:  airCoolCodes,
+		ValueStr: "UNSET,UNSET",
 	}
 }

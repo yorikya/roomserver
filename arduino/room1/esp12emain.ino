@@ -274,7 +274,6 @@ void loop()
 void sendSensorData(String device, String sensor,String value) {
   String url = "http://" + serverIP + "/update";
   url += "?device=" + device;
-  url += "&sensor=" + sensor;
   url += "&value=" + value;
   url += "&clientid=" + clientID;
 

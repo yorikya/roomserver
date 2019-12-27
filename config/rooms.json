@@ -1,17 +1,12 @@
 {
     "rooms": [
       {
-        "name": "room1_dht",
-        "devices": [
-            {"name":"dht", "sensor":"Humidity"},
-            {"name":"dht", "sensor":"Temperature"}
-        ]
-      },
-      {
         "name": "room1_main",
         "devices": [ 
           {"name":"rgbstrip", "sensor":"rgb"},
-          {"name":"ir_ac_aircool", "sensor":"ir"}
+          {"name":"ir_ac_aircool", "sensor":"ir"},
+          {"name":"dht_Humidity", "sensor":"Humidity"},
+          {"name":"dht_Temperature", "sensor":"Temperature"}
          ]
       }
     ]

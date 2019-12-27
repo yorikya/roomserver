@@ -92,10 +92,11 @@ func (s *RGBStrip) SendStats(c *statsd.Client) {
 
 func NewRGBStrip(id, sensor string) *RGBStrip {
 	return &RGBStrip{
-		ID:     id,
-		Name:   "rgbstrip",
-		Sensor: sensor,
-		mu:     &sync.Mutex{},
-		colors: stripColors,
+		ID:       id,
+		Name:     "rgbstrip",
+		Sensor:   sensor,
+		mu:       &sync.Mutex{},
+		colors:   stripColors,
+		ValueStr: "UNSET",
 	}
 }

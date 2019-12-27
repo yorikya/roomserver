@@ -38,7 +38,7 @@ func (c *Client) UpdateIPstr(ip string) {
 	}
 }
 
-func (c *Client) Update(device, sensor, value string) {
+func (c *Client) Update(device, value string) {
 	//device, sensor, value => hdt/Humidity/30.40
 	c.stats.Incr("update", 1)
 	c.mu.Lock()
@@ -49,25 +49,16 @@ func (c *Client) Update(device, sensor, value string) {
 		return
 	}
 
-	s := c.getSensor(device, sensor)
+	s := c.GetDeviceByName(device)
 	if s != nil {
 		s.SetValue(value)
 		s.SendStats(c.stats)
 		return
 	}
-	log.Printf("clientID: %s, does not has device: %s, sensor: %s\n", c.ClientID, device, sensor)
+	log.Printf("clientID: %s, does not has device: %s\n", c.ClientID, device)
 }
 
-func (c *Client) getSensor(name, sensor string) devices.Device {
-	for _, d := range c.Devices {
-		if d.GetName() == name && d.GetSensor() == sensor {
-			return d
-		}
-	}
-	return nil
-}
-
-func (c *Client) GetSensorByName(name string) devices.Device {
+func (c *Client) GetDeviceByName(name string) devices.Device {
 	for _, d := range c.Devices {
 		if d.GetName() == name {
 			return d

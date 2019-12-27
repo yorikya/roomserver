@@ -41,7 +41,7 @@ func withServerAction(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 				fmt.Fprintln(w, err)
 				return
 			}
-			if s := c.GetSensorByName(deviceID); s != nil {
+			if s := c.GetDeviceByName(deviceID); s != nil {
 				action, err := getURLParam(r, "action")
 				if err != nil {
 					log.Println(err)
@@ -95,10 +95,41 @@ func withServerData(s *server.Server) func(w http.ResponseWriter, r *http.Reques
 func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("/room request: %+v", r)
+		name, err := getURLParam(r, "name")
+		if err != nil {
+			log.Println(err)
+			fmt.Fprintln(w, err)
+			return
+		}
+		if c := s.GetClient(name); c != nil {
+			ac := strings.Split(c.GetDeviceByName("ir_ac_aircool").GetValueStr(), ",")
+			d := struct {
+				DHTSensorHumudutyVal,
+				DHTSensorTempertureVal,
+				RGBStripVal,
+				ACModeVal,
+				ACTempertureVal string
 
-		err := templates.ExecuteTemplate(w, "room.html", nil) //execute the template and pass it the HomePageVars struct to fill in the gaps
-		if err != nil {                                       // if there is an error
-			log.Print("template executing error: ", err) //log it
+				RGBOptions,
+				ACModeOptions,
+				ACTempertureOptions []string
+			}{ //For device name see rooms.json config
+				DHTSensorHumudutyVal:   c.GetDeviceByName("dht_Humidity").GetValueStr(),
+				DHTSensorTempertureVal: c.GetDeviceByName("dht_Temperature").GetValueStr(),
+				RGBStripVal:            c.GetDeviceByName("rgbstrip").GetValueStr(),
+				ACModeVal:              ac[0],
+				ACTempertureVal:        ac[1],
+				//TODO: Contnune from here
+			}
+			err := templates.ExecuteTemplate(w, "room.html", d) //execute the template and pass it the HomePageVars struct to fill in the gaps
+			if err != nil {                                     // if there is an error
+				log.Print("template executing error: ", err) //log it
+				fmt.Fprintln(w, err)
+			}
+			log.Println("generate room.html, room name", name)
+		} else {
+			log.Println("client", name, "not exists")
+			fmt.Fprintln(w, "can not find client ", name)
 		}
 	}
 }
@@ -155,12 +186,6 @@ func withServerUpdate(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 				fmt.Fprintln(w, err)
 				return
 			}
-			sensor, err := getURLParam(r, "sensor")
-			if err != nil {
-				log.Println(err)
-				fmt.Fprintln(w, err)
-				return
-			}
 			value, err := getURLParam(r, "value")
 			if err != nil {
 				log.Println(err)
@@ -168,7 +193,7 @@ func withServerUpdate(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 				return
 			}
 
-			c.Update(device, sensor, value)
+			c.Update(device, value)
 			return
 		}
 		err = fmt.Errorf("server dos not have clientID: %s", clientid)
@@ -198,7 +223,7 @@ func withServerAuth(s *server.Server) func(w http.ResponseWriter, r *http.Reques
 		if c := s.GetClient(clientid); c != nil {
 			c.UpdateIPstr(cutClientIP(r.RemoteAddr))
 			for _, d := range c.Devices {
-				m[fmt.Sprintf("%s_%s", d.GetID(), d.GetSensor())] = d
+				m[d.GetName()] = d
 			}
 			resp := AuthResponse{
 				Success:    true,

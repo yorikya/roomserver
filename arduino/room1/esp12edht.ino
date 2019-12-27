@@ -131,8 +131,8 @@ void loop()
   if (currentMillis - previousMillis >= clientDataInterval) {
     previousMillis = currentMillis;
     
-    sendSensorData(clientData["Devices"]["room1_dht_Humidity"]["Name"],clientData["Devices"]["room1_dht_Humidity"]["Sensor"],String(dht.readHumidity()).c_str());
-    sendSensorData(clientData["Devices"]["room1_dht_Temperature"]["Name"],clientData["Devices"]["room1_dht_Temperature"]["Sensor"],String(dht.readTemperature()).c_str()); 
+    sendSensorData(clientData["Devices"]["room1_dht_Humidity"]["Name"],String(dht.readHumidity()).c_str());
+    sendSensorData(clientData["Devices"]["room1_dht_Temperature"]["Name"],String(dht.readTemperature()).c_str()); 
   } 
   
 }
@@ -141,7 +141,6 @@ void loop()
 void sendSensorData(String device, String sensor,String value) {
   String url = "http://" + serverIP + "/update";
   url += "?device=" + device;
-  url += "&sensor=" + sensor;
   url += "&value=" + value;
   url += "&clientid=" + clientID;
 
