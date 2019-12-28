@@ -9,7 +9,6 @@ import (
 	"text/template"
 
 	"github.com/yorikya/roomserver/client"
-	"github.com/yorikya/roomserver/devices"
 	"github.com/yorikya/roomserver/server"
 )
 
@@ -214,21 +213,14 @@ func withServerAuth(s *server.Server) func(w http.ResponseWriter, r *http.Reques
 		}
 
 		type AuthResponse struct {
-			Success    bool
-			Devices    map[string]devices.Device
-			DevicesNum int
-			ErrMsg     string
+			Success bool
+			ErrMsg  string
 		}
-		m := make(map[string]devices.Device)
+
 		if c := s.GetClient(clientid); c != nil {
 			c.UpdateIPstr(cutClientIP(r.RemoteAddr))
-			for _, d := range c.Devices {
-				m[d.GetName()] = d
-			}
 			resp := AuthResponse{
-				Success:    true,
-				Devices:    m,
-				DevicesNum: len(m),
+				Success: true,
 			}
 			b, err := json.Marshal(resp)
 			if err != nil {
@@ -240,10 +232,8 @@ func withServerAuth(s *server.Server) func(w http.ResponseWriter, r *http.Reques
 		}
 		msg := fmt.Sprintf("authetication failed no have clientID: %s", clientid)
 		resp := AuthResponse{
-			Success:    false,
-			Devices:    m,
-			DevicesNum: len(m),
-			ErrMsg:     msg,
+			Success: false,
+			ErrMsg:  msg,
 		}
 		b, err := json.Marshal(resp)
 		if err != nil {
