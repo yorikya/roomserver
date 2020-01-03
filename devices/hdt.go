@@ -33,6 +33,10 @@ func (s *HDTSensor) GetName() string {
 	return s.Name
 }
 
+func (s *HDTSensor) GetOptions(_ string) []string {
+	return []string{}
+}
+
 func (s *HDTSensor) SetValue(newValstr string) error {
 	newValue, err := strconv.ParseFloat(newValstr, 64)
 	if err != nil {

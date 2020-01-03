@@ -9,6 +9,32 @@ import (
 	"github.com/smira/go-statsd"
 )
 
+const (
+	CLEAN = "CLEAN"
+	COND = "COND"
+	OFF = "OFF"
+	HEAT = "HEAT"
+	COOL = "COOL"
+
+	T16 = "16"
+	T17 = "17"
+	T18 = "18"
+	T19 = "19"
+	T20 = "20"
+	T21 = "21"
+	T22 = "22"
+	T23 = "23"
+	T24 = "24"
+	T25 = "25"
+	T26 = "26"
+	T27 = "27"
+	T28 = "28"
+	T29 = "29"
+	T30 = "30"
+	T31 = "31"
+	T32 = "32"
+)
+
 var (
 	airCoolCodes = []IRCode{
 		IRCode{
@@ -231,6 +257,16 @@ func (s *IRACAirCool) SetValue(newValstr string) error {
 
 func (s *IRACAirCool) GetValueStr() string {
 	return s.ValueStr
+}
+
+func (s *IRACAirCool) GetOptions(str string) []string {
+	switch str {
+	case "mode":
+		return []string{COOL, HEAT, OFF, CLEAN, COND} 
+	case "temp":
+		return []string{T16,T17,T18,T19,T20,T21,T22,T23,T24,T25,T26,T27,T28,T29,T30,T31,T32}
+	}
+	return []string{}
 }
 
 func (s *IRACAirCool) SendStats(c *statsd.Client) {

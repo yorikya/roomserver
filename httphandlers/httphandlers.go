@@ -118,7 +118,9 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 				RGBStripVal:            c.GetDeviceByName("rgbstrip").GetValueStr(),
 				ACModeVal:              ac[0],
 				ACTempertureVal:        ac[1],
-				//TODO: Contnune from here
+				ACModeOptions:          c.GetDeviceByName("ir_ac_aircool").GetOptions("mode"),
+				ACTempertureOptions:    c.GetDeviceByName("ir_ac_aircool").GetOptions("temp"),
+				RGBOptions:             c.GetDeviceByName("rgbstrip").GetOptions(""),
 			}
 			err := templates.ExecuteTemplate(w, "room.html", d) //execute the template and pass it the HomePageVars struct to fill in the gaps
 			if err != nil {                                     // if there is an error

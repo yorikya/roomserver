@@ -86,6 +86,14 @@ func (s *RGBStrip) GetValueStr() string {
 	return s.ValueStr
 }
 
+func (s *RGBStrip) GetOptions(_ string) []string {
+	copt := []string{}
+	for _, c := range stripColors {
+		copt = append(copt, c.GetTag())
+	}
+	return copt
+}
+
 func (s *RGBStrip) SendStats(c *statsd.Client) {
 	log.Println("RGB need implement this function")
 }

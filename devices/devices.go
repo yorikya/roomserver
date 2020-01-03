@@ -24,6 +24,7 @@ type Device interface {
 	GetName() string
 	GetSensor() string
 	GetValueStr() string
+	GetOptions(string) []string
 	SetValue(string) error
 	CreateCMD(string) (string, string, error)
 	SendStats(*statsd.Client)

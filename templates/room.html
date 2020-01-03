@@ -1,89 +1,72 @@
 {{ template "header.html" . }}
-
-<div class="row">
-    <div style="background-color:#F5F5DC; color:#000000; border: 4px solid black;" class="col-md-6">
-            <u><h1>DHT Sensor</h1></u>
+<div class="view" style="background-image: url('/static/Home.jpeg'); background-repeat: no-repeat; background-size: cover; background-position: center center;">
+    <div class="row">
+        <div style="color:#000000; border: 4px solid black; border-radius: 25px;" class="col-md-6">
+            <div class="text-center"><u><h1>Temperture</h1></u></div>
             </br>
-            <h2>Humuduty:</h2>
-            <h2 class="text-success">{{.DHTSensorHumudutyVal}}<h2>     
-            </br> 
-    </div>
-    <div style="background-color:#F5F5DC; color:#000000; border: 4px solid black;" class="col-md-6">
-        <u><h1>DHT Sensor</h1></u>
-        </br>
-        <h2>Temperture:</h2>
-        <h2 class="text-success">{{.DHTSensorTempertureVal}}</h2>
-        </br>
-
-    </div>
-</div>
-<div class="row">  
-    <div  style="background-color:#F5F5DC; color:#000000; border: 4px solid black;" class="col-md-6">
-            <u><h1>RGB Strip Color</h1></u>
+            <div class="text-center">
+                <img src="/static/Temperture.png" class="rounded mx-auto d-block" alt="Responsive image">
+            </div>
+            <div class="text-center"><h2 class="text-success">{{.DHTSensorTempertureVal}}<h2></div>
             </br>
-            <h2>RGB Color:</h2>
-            <h2 class="text-info">{{.RGBStripVal}}</h2>
-            
-            <label for="RGBColor tag">RGB Tag</label>
+
+        </div>
+        <div style="color:#000000; border: 4px solid black; border-radius: 25px;" class="col-md-6">
+            <div class="text-center"><u><h1>Humuduty</h1></u></div>
+                </br>
+                <div class="text-center">
+                    <img src="/static/Humuduty.png" class="rounded mx-auto d-block" alt="Responsive image">
+                </div>
+                
+                <div class="text-center"><h2 class="text-success">{{.DHTSensorHumudutyVal}}<h2></div>     
+                </br> 
+        </div>
+        
+    </div>
+    <div class="row">  
+        <div  style="color:#000000; border: 4px solid black; border-radius: 25px;" class="col-md-6">
+                <u><h1>RGB Strip Color</h1></u>
+                </br>
+                <h2>RGB Color:</h2>
+                <h2 class="text-info">{{.RGBStripVal}}</h2>
+                
+                <label for="RGBColor tag">RGB Tag</label>
+                <select class="form-control" id="rgb_strip">
+                    {{range .RGBOptions}}
+                        <option name="{{.}}">{{.}}</option>
+                    {{end}}
+                </select>
+                </br>
+                    <button type="button" class="btn btn-primary">Send</button>
+
+        </div>
+
+        <div style="color:#000000; border: 4px solid black; border-radius: 25px;" class="col-md-6">
+            <u><h1>Air Conditioner</h1></u>
+            </br>
+            <h2>Mode: {{.ACModeVal}}</h2>
+            <h2>Temperture: {{.ACTempertureVal}}</h2>
+            </br>
+
+            <label for="AC mode">Mode</label>
+            <select class="form-control" id="ac_mode">
+                {{range .ACModeOptions}}
+                    <option name="{{.}}">{{.}}</option>
+                {{end}}
+            </select>
+            </br>
+            <label for="AC temp" id="ac_temp">Temp</label>
             <select class="form-control">
-                <option>LUM_1900</option>
-                <option>LUM_2600</option>
-                <option>LUM_2850</option>
-                <option>LUM_3200</option>
-                <option>LUM_5200</option>
-                <option>LUM_5400</option>
-                <option>LUM_6000</option>
-                <option>LUM_7000</option>
-                <option>LUM_20000</option>
-                <option>WHITE</option>
+                {{range .ACTempertureOptions}}
+                    <option name="{{.}}">{{.}}</option>
+                {{end}}
             </select>
             </br>
                 <button type="button" class="btn btn-primary">Send</button>
-
-    </div>
-
-    <div style="background-color:#F5F5DC; color:#000000; border: 4px solid black;" class="col-md-6">
-        <u><h1>Air Conditioner</h1></u>
-        </br>
-        <h2>Mode: {{.ACModeVal}}</h2>
-        <h2>Temperture: {{.ACTempertureVal}}</h2>
-         </br>
-
-        <label for="AC mode">Mode</label>
-        <select class="form-control">
-            <option>HEAT</option>
-            <option>COOL</option>
-            <option>CLEAN</option>
-            <option>COND</option>
-            <option>OFF</option>
-        </select>
-        </br>
-        <label for="AC temp">Temp</label>
-        <select class="form-control">
-            <option>16</option>
-            <option>17</option>
-            <option>18</option>
-            <option>19</option>
-            <option>20</option>
-            <option>21</option>
-            <option>22</option>
-            <option>23</option>
-            <option>24</option>
-            <option>25</option>
-            <option>26</option>
-            <option>27</option>
-            <option>28</option>
-            <option>29</option>
-            <option>30</option>
-            <option>31</option>
-            <option>32</option>
-        </select>
-        </br>
-            <button type="button" class="btn btn-primary">Send</button>
-        
+            
+        </div>
     </div>
 </div>
-
    <!-- <button onclick="selectRoom()" type="submit" class="btn btn-default">Select</button>
    <script>
         var selectOption = $( "#select_room" );
