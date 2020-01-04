@@ -5,6 +5,7 @@ import (
 	"sync"
 	"strconv"
 	"strings"
+	"sort"
 
 	"github.com/smira/go-statsd"
 )
@@ -262,9 +263,25 @@ func (s *IRACAirCool) GetValueStr() string {
 func (s *IRACAirCool) GetOptions(str string) []string {
 	switch str {
 	case "mode":
-		return []string{COOL, HEAT, OFF, CLEAN, COND} 
+		set := make(map[string]bool) 
+		for _, m := range airCoolCodes {
+			set[strings.Split(m.GetTag(), "_")[0]] = true
+		}
+		modes := []string{}
+		for k := range set {         
+			modes = append(modes, k)
+		}
+		return modes 
 	case "temp":
-		return []string{T16,T17,T18,T19,T20,T21,T22,T23,T24,T25,T26,T27,T28,T29,T30,T31,T32}
+		temps := []string{}
+		for _, m := range airCoolCodes {
+			temp := strings.Split(m.GetTag(), "_")
+			if len(temp) > 1 {
+				temps = append(temps, temp[1])
+			}
+		}
+		sort.Strings(temps)
+		return temps 
 	}
 	return []string{}
 }
