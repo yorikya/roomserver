@@ -10,6 +10,7 @@ import (
 
 type Server struct {
 	clients map[string]*client.Client
+	roomHub string
 }
 
 func (s *Server) GetClients() map[string]*client.Client {

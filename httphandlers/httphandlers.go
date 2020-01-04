@@ -11,6 +11,7 @@ import (
 	"github.com/yorikya/roomserver/client"
 	"github.com/yorikya/roomserver/devices"
 	"github.com/yorikya/roomserver/server"
+	"golang.org/x/net/websocket"
 )
 
 //HTML Tmplates directory
@@ -160,6 +161,18 @@ func withServerRooms(s *server.Server) func(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+func withServerWS(s *server.Server) func(*websocket.Conn) {
+	return func(ws *websocket.Conn) {
+		log.Printf("get ws connection: %+v\n", ws)
+		data := map[string]interface{}{
+			"success": true,
+		}
+		if err := websocket.JSON.Send(ws, data); err != nil {
+			log.Printf("get error when send ws data: %s\n", err)
+		}
+	}
+}
+
 func serverLogin(w http.ResponseWriter, r *http.Request) {
 	log.Printf("get login request: %+v", r)
 	if r.Method == "GET" {
@@ -272,6 +285,7 @@ func InitRoutes(s *server.Server) {
 	http.HandleFunc("/login", serverLogin)
 	http.HandleFunc("/rooms", withServerRooms(s))
 	http.HandleFunc("/room", withServerSelectRoom(s))
+	http.Handle("/ws", websocket.Handler(withServerWS(s)))
 
 	// This works and strip "/static/" fragment from path
 	fs := http.FileServer(http.Dir("static"))

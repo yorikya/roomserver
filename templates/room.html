@@ -89,6 +89,25 @@
         var rgb_strip = $( "#rgb_strip" );
         var ac_mode = $( "#ac_mode" );
         var ac_temp = $( "#ac_temp" );
+
+        if (window["WebSocket"]) {
+            conn = new WebSocket("ws://" + document.location.host + "/ws");
+            conn.onclose = function (evt) {
+                console.log("close connection", evt);
+            };
+            conn.onmessage = function (evt) {
+                var messages = evt.data.split('\n');
+                for (var i = 0; i < messages.length; i++) {
+                    var item = document.createElement("div");
+                    item.innerText = messages[i];
+                    console.log("message:", item);
+                }
+            };
+        } else {
+            var item = document.createElement("div");
+            item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+            console.log(item);
+        }
         
         function sendRGB() {
             var url = "/action?roomid={{.RoomID}}_main&deviceid={{.RGBName}}&action=" + rgb_strip.val();

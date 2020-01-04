@@ -9,5 +9,6 @@ require (
 	github.com/ylamothe/logrustash v0.0.0-20170628144031-13b8689a7028
 
 	gobot.io/x/gobot v1.14.0
+	golang.org/x/net v0.0.0-20190930134127-c5a3c61f89f3
 	golang.org/x/sys v0.0.0-20191126131656-8a8471f7e56d // indirect
 )
