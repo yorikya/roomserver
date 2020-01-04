@@ -16,6 +16,18 @@ func (s *Server) GetClients() map[string]*client.Client {
 	return s.clients
 }
 
+func (s *Server) GetRooms() []string {
+	set := make(map[string]bool)
+	for _, c := range s.clients {
+		set[c.GetRoomID()] = true
+	}
+	rooms := []string{}
+	for r := range set {
+		rooms = append(rooms, r)
+	}
+	return rooms
+}
+
 func (s *Server) GetClient(name string) *client.Client {
 	c, ok := s.clients[name]
 	if !ok {
@@ -25,22 +37,22 @@ func (s *Server) GetClient(name string) *client.Client {
 	return c
 }
 
-func NewServer(roomNames ...string) *Server {
+func NewServer(configPath string) *Server {
 	s := &Server{
 		clients: make(map[string]*client.Client),
 	}
-	cfgRooms, err := config.ParseRooms("config/rooms.json")
+	cfgRooms, err := config.ParseRooms(configPath)
 	if err != nil {
 		log.Printf("failed parse file %s", err)
 	}
-	for _, roomName := range roomNames {
-		roomCfg := cfgRooms.GetRoom(roomName)
+	for _, room := range cfgRooms.Rooms {
+		roomCfg := cfgRooms.GetRoom(room.Name)
 		if roomCfg == nil {
-			log.Printf("dosen't have config for '%s'", roomName)
+			log.Printf("dosen't have config for '%s'", room.Name)
 			continue
 		}
-		s.clients[roomName] = client.NewClient(roomName, devices.NewDevices(roomName, roomCfg)...)
-		log.Printf("client: %s was added, data: %+v\n", roomName, s.clients[roomName])
+		s.clients[room.Name] = client.NewClient(room.Name, devices.NewDevices(room.Name, roomCfg)...)
+		log.Printf("client: %s was added, data: %+v\n", room.Name, s.clients[room.Name])
 	}
 
 	return s

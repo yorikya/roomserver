@@ -8,6 +8,12 @@
           {"name":"dht_Humidity", "sensor":"Humidity"},
           {"name":"dht_Temperature", "sensor":"Temperature"}
          ]
+      },
+      {
+        "name": "room1_cam",
+        "devices": [ 
+          {"name":"camera", "sensor":"camera 2MP"}
+         ]
       }
     ]
   }

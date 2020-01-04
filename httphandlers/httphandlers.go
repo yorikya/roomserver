@@ -9,6 +9,7 @@ import (
 	"text/template"
 
 	"github.com/yorikya/roomserver/client"
+	"github.com/yorikya/roomserver/devices"
 	"github.com/yorikya/roomserver/server"
 )
 
@@ -93,26 +94,38 @@ func withServerData(s *server.Server) func(w http.ResponseWriter, r *http.Reques
 
 func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("/room request: %+v", r)
 		name, err := getURLParam(r, "name")
 		if err != nil {
 			log.Println(err)
 			fmt.Fprintln(w, err)
 			return
 		}
-		if c := s.GetClient(name); c != nil {
+		if c := s.GetClient(fmt.Sprintf("%s_main", name)); c != nil {
+			camroom := fmt.Sprintf("%s_cam", name)
+			clientCam := s.GetClient(camroom)
+			if clientCam == nil {
+				log.Printf("room '%s' does not have cammera (%s), init default camera", name, camroom)
+				clientCam = client.NewClient(camroom, devices.NewCamera(camroom, "camera 2MP"))
+			}
 			ac := strings.Split(c.GetDeviceByName("ir_ac_aircool").GetValueStr(), ",")
 			d := struct {
+				RoomID,
 				DHTSensorHumudutyVal,
 				DHTSensorTempertureVal,
 				RGBStripVal,
 				ACModeVal,
-				ACTempertureVal string
+				ACTempertureVal,
+				CameraStatus,
+				ACName,
+				RGBName string
 
 				RGBOptions,
 				ACModeOptions,
 				ACTempertureOptions []string
 			}{ //For device name see rooms.json config
+				RGBName:                "rgbstrip",
+				ACName:                 "ir_ac_aircool",
+				RoomID:                 name,
 				DHTSensorHumudutyVal:   c.GetDeviceByName("dht_Humidity").GetValueStr(),
 				DHTSensorTempertureVal: c.GetDeviceByName("dht_Temperature").GetValueStr(),
 				RGBStripVal:            c.GetDeviceByName("rgbstrip").GetValueStr(),
@@ -121,6 +134,7 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 				ACModeOptions:          c.GetDeviceByName("ir_ac_aircool").GetOptions("mode"),
 				ACTempertureOptions:    c.GetDeviceByName("ir_ac_aircool").GetOptions("temp"),
 				RGBOptions:             c.GetDeviceByName("rgbstrip").GetOptions(""),
+				CameraStatus:           clientCam.GetDeviceByName("camera").GetValueStr(),
 			}
 			err := templates.ExecuteTemplate(w, "room.html", d) //execute the template and pass it the HomePageVars struct to fill in the gaps
 			if err != nil {                                     // if there is an error
@@ -138,8 +152,8 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 func withServerRooms(s *server.Server) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		err := templates.ExecuteTemplate(w, "rooms.html", s.GetClients()) //execute the template and pass it the HomePageVars struct to fill in the gaps
-		if err != nil {                                                   // if there is an error
+		err := templates.ExecuteTemplate(w, "rooms.html", s.GetRooms()) //execute the template and pass it the HomePageVars struct to fill in the gaps
+		if err != nil {                                                 // if there is an error
 			log.Print("template executing error: ", err) //log it
 		}
 

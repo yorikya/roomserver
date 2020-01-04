@@ -17,6 +17,9 @@ const (
 
 	//AC Air Cool IR
 	ir_ac_aircool = "ir_ac_aircool"
+
+	//Video camera
+	camera = "camera"
 )
 
 type Device interface {
@@ -42,6 +45,8 @@ func NewDevices(roomName string, roomCfg *config.Room) []Device {
 			sens = append(sens, NewRGBStrip(roomName, device.Sensor))
 		case ir_ac_aircool:
 			sens = append(sens, NewIRACAirCool(roomName, device.Sensor))
+		case camera:
+			sens = append(sens, NewCamera(roomName, device.Sensor))
 		}
 	}
 	return sens

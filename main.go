@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	s := server.NewServer("room1_main")
+	s := server.NewServer("config/rooms.json")
 	defer s.Close()
 
 	httphandlers.InitRoutes(s)

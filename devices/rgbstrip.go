@@ -19,7 +19,8 @@ var (
 		RGBColor{"LUM_6000", 255, 255, 255, 50},
 		RGBColor{"LUM_7000", 201, 226, 255, 50},
 		RGBColor{"LUM_20000", 64, 156, 255, 50},
-		RGBColor{"WHITE", 255, 255, 255, 0},
+		RGBColor{"ON", 255, 255, 255, 50},
+		RGBColor{"OFF", 0, 0, 0, 50},
 	}
 )
 

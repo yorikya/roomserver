@@ -221,6 +221,10 @@ type IRACAirCool struct {
 }
 
 func (s *IRACAirCool) getIRCode(tag string) (IRCode, bool) {
+	if !strings.HasPrefix(tag, "COOL") && !strings.HasPrefix(tag, "HEAT") {
+		tag = strings.Split(tag, "_")[0]
+	} 
+	
 	for _, irc := range s.codes {
 		if irc.tag == tag {
 			return irc, true
@@ -271,14 +275,19 @@ func (s *IRACAirCool) GetOptions(str string) []string {
 		for k := range set {         
 			modes = append(modes, k)
 		}
+		sort.Strings(modes)
 		return modes 
 	case "temp":
-		temps := []string{}
+		set := make(map[string]bool) 
 		for _, m := range airCoolCodes {
 			temp := strings.Split(m.GetTag(), "_")
 			if len(temp) > 1 {
-				temps = append(temps, temp[1])
+				set[temp[1]] = true
 			}
+		}
+		temps := []string{}
+		for k := range set {
+			temps = append(temps, k)
 		}
 		sort.Strings(temps)
 		return temps 

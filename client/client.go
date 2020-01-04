@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"sync"
 	"time"
@@ -12,21 +13,26 @@ import (
 )
 
 type Client struct {
-	ClientID, IPstr string
-	LastSeen        time.Time
-	stats           *statsd.Client
-	mu              *sync.Mutex
-	Devices         []devices.Device
+	roomID, ClientID, IPstr string
+	LastSeen                time.Time
+	stats                   *statsd.Client
+	mu                      *sync.Mutex
+	Devices                 []devices.Device
 }
 
 func NewClient(clientID string, d ...devices.Device) *Client {
 	log.Printf("Create a new client '%s'\n", clientID)
 	return &Client{
+		roomID:   strings.Split(clientID, "_")[0],
 		Devices:  d,
 		mu:       &sync.Mutex{},
 		ClientID: clientID,
 		stats:    statsd.NewClient("localhost:8125", statsd.MaxPacketSize(1400), statsd.MetricPrefix(fmt.Sprintf("home.%s.", clientID))),
 	}
+}
+
+func (c *Client) GetRoomID() string {
+	return c.roomID
 }
 
 func (c *Client) UpdateIPstr(ip string) {

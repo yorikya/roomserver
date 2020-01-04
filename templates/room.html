@@ -1,21 +1,21 @@
 {{ template "header.html" . }}
-<div class="view" style="background-image: url('/static/Home.jpeg'); background-repeat: no-repeat; background-size: cover; background-position: center center;">
+<div class="view" style="background-image: url('/static/roomhtml/Home.jpeg'); background-repeat: no-repeat; background-size: cover; background-position: center center;">
     <div class="row">
-        <div style="color:#000000; border: 4px solid black; border-radius: 25px;" class="col-md-6">
+        <div style=" color:#000000; border: 4px solid 	#F5F5F5 ; border-radius: 25px;" class="col-md-6">
             <div class="text-center"><u><h1>Temperature</h1></u></div>
             </br>
             <div class="text-center">
-                <img src="/static/Temperture.png" class="rounded mx-auto d-block" alt="Responsive image">
+                <img src="/static/roomhtml/Temperture.png" class="rounded mx-auto d-block" alt="Responsive image">
             </div>
             <div class="text-center"><h2 class="text-success">{{.DHTSensorTempertureVal}}<h2></div>
             </br>
 
         </div>
-        <div style="color:#000000; border: 4px solid black; border-radius: 25px;" class="col-md-6">
+        <div style="color:#000000; border: 4px solid 	#F5F5F5; border-radius: 25px;" class="col-md-6">
             <div class="text-center"><u><h1>Humidity</h1></u></div>
                 </br>
                 <div class="text-center">
-                    <img src="/static/Humuduty.png" class="rounded mx-auto d-block" alt="Responsive image">
+                    <img src="/static/roomhtml/Humuduty.png" class="rounded mx-auto d-block" alt="Responsive image">
                 </div>
                 
                 <div class="text-center"><h2 class="text-success">{{.DHTSensorHumudutyVal}}<h2></div>     
@@ -24,24 +24,30 @@
         
     </div>
     <div class="row">  
-        <div  style="color:#000000; border: 4px solid black; border-radius: 25px;" class="col-md-6">
+        <div  style="color:#000000; border: 4px solid 	#F5F5F5; border-radius: 25px;" class="col-md-6">
                 <div class="text-center"><u><h1>RGB Strip Color</h1></u></div>
                 </br>
                 <h2>RGB Color</h2>
                 <h2 class="text-info">{{.RGBStripVal}}</h2>
-                
+            </br>
                 <label for="RGBColor tag">RGB Tag</label>
                 <select class="form-control" id="rgb_strip">
                     {{range .RGBOptions}}
                         <option name="{{.}}">{{.}}</option>
                     {{end}}
                 </select>
+                
                 </br>
-                    <button type="button" class="btn btn-primary">Send</button>
-
+                </br> 
+                <div class="text-left">
+                    <button onclick="sendRGB()" type="submit" class="btn btn-primary">Send</button>
+                </div>
+            </br> 
+            
+            </br>
         </div>
 
-        <div style="color:#000000; border: 4px solid black; border-radius: 25px;" class="col-md-6">
+        <div style="color:#000000; border: 4px solid 	#F5F5F5; border-radius: 25px;" class="col-md-6">
             <div class="text-center"><u><h1>Air Conditioner</h1></u></div>
             </br>
             <h2>Mode {{.ACModeVal}}</h2>
@@ -55,23 +61,49 @@
                 {{end}}
             </select>
             </br>
-            <label for="AC temp" id="ac_temp">Temp</label>
-            <select class="form-control">
+            <label for="AC temp" >Temp</label>
+            <select class="form-control" id="ac_temp">
                 {{range .ACTempertureOptions}}
                     <option name="{{.}}">{{.}}</option>
                 {{end}}
             </select>
             </br>
-                <button type="button" class="btn btn-primary">Send</button>
-            
+                <button onclick="sendAC()" type="submit" class="btn btn-primary">Send</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div style=" color:#000000; border: 4px solid 	#F5F5F5; border-radius: 25px;" class="col-md-6">
+            <div class="text-center"><u><h1>Camera</h1></u></div>
+            </br>
+            <div class="text-center">
+                <img src="/static/roomhtml/NoSignal.jpeg" class="img-fluid" alt="Responsive image">
+            </div>
+            <div class="text-center"><h2 class="text-success">{{.CameraStatus}}<h2></div>
+            </br>
         </div>
     </div>
 </div>
-   <!-- <button onclick="selectRoom()" type="submit" class="btn btn-default">Select</button>
+   
    <script>
-        var selectOption = $( "#select_room" );
-        function selectRoom() {
-            window.location.replace("/room?name="+selectOption.val());
+        var rgb_strip = $( "#rgb_strip" );
+        var ac_mode = $( "#ac_mode" );
+        var ac_temp = $( "#ac_temp" );
+        
+        function sendRGB() {
+            var url = "/action?roomid={{.RoomID}}_main&deviceid={{.RGBName}}&action=" + rgb_strip.val();
+            $.get(url , function( data ) {
+                    alert( "Data Loaded: " + data );
+            });
+            
         }   
-   </script> -->
+
+        function sendAC() {
+            var url = "/action?roomid={{.RoomID}}_main&deviceid={{.ACName}}&action=" + ac_mode.val()+"_"+ac_temp.val();
+            $.get(url , function( data ) {
+                    alert( "Data Loaded: " + data );
+            });
+            
+        }   
+   </script>
 {{ template "footer.html" . }}
