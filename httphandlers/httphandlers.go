@@ -11,11 +11,19 @@ import (
 	"github.com/yorikya/roomserver/client"
 	"github.com/yorikya/roomserver/devices"
 	"github.com/yorikya/roomserver/server"
-	"golang.org/x/net/websocket"
+
+	"github.com/gorilla/websocket"
 )
 
 //HTML Tmplates directory
-var templates = template.Must(template.ParseGlob("templates/*"))
+var (
+	templates = template.Must(template.ParseGlob("templates/*"))
+
+	upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+)
 
 func getURLParam(r *http.Request, key string) (string, error) {
 	keys, ok := r.URL.Query()[key]
@@ -42,19 +50,27 @@ func withServerAction(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 				fmt.Fprintln(w, err)
 				return
 			}
-			if s := c.GetDeviceByName(deviceID); s != nil {
+			if device := c.GetDeviceByName(deviceID); device != nil {
 				action, err := getURLParam(r, "action")
 				if err != nil {
 					log.Println(err)
 					fmt.Fprintln(w, err)
 					return
 				}
-				cmd, val, err := s.CreateCMD(action)
+				cmd, val, err := device.CreateCMD(action)
 				if err != nil {
 					log.Println(err)
 					fmt.Fprintln(w, err)
 					return
 				}
+
+				//TODO: Should be after get success response from client
+				if err = s.RoomHub.Brodcast(fmt.Sprintf("%s/update/%s/%s", roomID, deviceID, val)); err != mil {
+					log.Println("failed broadcast message")
+					fmt.Fprintln(w, err)
+					return
+				}
+
 				url := fmt.Sprintf("http://%s/action?deviceid=%s&val=%s&cmd=%s", c.IPstr, deviceID, val, cmd)
 				log.Println("the client action url:", url)
 				res, err := http.Get(url)
@@ -64,7 +80,7 @@ func withServerAction(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 					return
 				}
 
-				s.SetValue(val)
+				device.SetValue(val)
 				log.Println("the response from client", res)
 				return
 			}
@@ -161,15 +177,18 @@ func withServerRooms(s *server.Server) func(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func withServerWS(s *server.Server) func(*websocket.Conn) {
-	return func(ws *websocket.Conn) {
-		log.Printf("get ws connection: %+v\n", ws)
-		data := map[string]interface{}{
-			"success": true,
+func withServerWS(s *server.Server) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		//TODO: Store connection
+		log.Printf("get ws connection: %+v\n", r)
+
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Println(err)
+			return
 		}
-		if err := websocket.JSON.Send(ws, data); err != nil {
-			log.Printf("get error when send ws data: %s\n", err)
-		}
+
+		s.RoomHub.Register(conn)
 	}
 }
 
@@ -285,7 +304,7 @@ func InitRoutes(s *server.Server) {
 	http.HandleFunc("/login", serverLogin)
 	http.HandleFunc("/rooms", withServerRooms(s))
 	http.HandleFunc("/room", withServerSelectRoom(s))
-	http.Handle("/ws", websocket.Handler(withServerWS(s)))
+	http.HandleFunc("/ws", withServerWS(s))
 
 	// This works and strip "/static/" fragment from path
 	fs := http.FileServer(http.Dir("static"))

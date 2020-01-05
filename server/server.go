@@ -6,11 +6,12 @@ import (
 	"github.com/yorikya/roomserver/client"
 	"github.com/yorikya/roomserver/config"
 	"github.com/yorikya/roomserver/devices"
+	"github.com/yorikya/roomserver/hub"
 )
 
 type Server struct {
 	clients map[string]*client.Client
-	roomHub string
+	RoomHub *hub.Hub
 }
 
 func (s *Server) GetClients() map[string]*client.Client {
@@ -41,6 +42,7 @@ func (s *Server) GetClient(name string) *client.Client {
 func NewServer(configPath string) *Server {
 	s := &Server{
 		clients: make(map[string]*client.Client),
+		RoomHub: hub.NewHub(),
 	}
 	cfgRooms, err := config.ParseRooms(configPath)
 	if err != nil {
