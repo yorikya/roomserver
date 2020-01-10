@@ -65,7 +65,7 @@ func withServerAction(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 				}
 
 				//TODO: Should be after get success response from client
-				if err = s.RoomHub.Brodcast(fmt.Sprintf("%s/update/%s/%s", roomID, deviceID, val)); err != mil {
+				if err = s.RoomHub.Brodcast(fmt.Sprintf("%s/update/dht_Humidity/text-success/43.4", roomID)); err != nil {
 					log.Println("failed broadcast message")
 					fmt.Fprintln(w, err)
 					return
@@ -117,18 +117,27 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 			fmt.Fprintln(w, err)
 			return
 		}
-		if c := s.GetClient(fmt.Sprintf("%s_main", name)); c != nil {
+		mainRomm := fmt.Sprintf("%s_main", name)
+		if c := s.GetClient(mainRomm); c != nil {
+			cameraID := "camera"
 			camroom := fmt.Sprintf("%s_cam", name)
 			clientCam := s.GetClient(camroom)
 			if clientCam == nil {
 				log.Printf("room '%s' does not have cammera (%s), init default camera", name, camroom)
-				clientCam = client.NewClient(camroom, devices.NewCamera(camroom, "camera 2MP"))
+				clientCam = client.NewClient(camroom, devices.NewCamera(camroom, cameraID))
 			}
-			ac := strings.Split(c.GetDeviceByName("ir_ac_aircool").GetValueStr(), ",")
+			rgbStripID := "rgbstrip"
+			irac := "ir_ac_aircool"
+			dhth := "dht_Humidity"
+			dhtt := "dht_Temperature"
+			ac := strings.Split(c.GetDeviceByName(irac).GetValueStr(), ",")
 			d := struct {
 				RoomID,
-				DHTSensorHumudutyVal,
-				DHTSensorTempertureVal,
+				DHTHumuditi,
+				DHTTemperture,
+				CameraID,
+				DHTSensorHumudutyHTML,
+				DHTSensorTempertureHTML,
 				RGBStripVal,
 				ACModeVal,
 				ACTempertureVal,
@@ -140,18 +149,21 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 				ACModeOptions,
 				ACTempertureOptions []string
 			}{ //For device name see rooms.json config
-				RGBName:                "rgbstrip",
-				ACName:                 "ir_ac_aircool",
-				RoomID:                 name,
-				DHTSensorHumudutyVal:   c.GetDeviceByName("dht_Humidity").GetValueStr(),
-				DHTSensorTempertureVal: c.GetDeviceByName("dht_Temperature").GetValueStr(),
-				RGBStripVal:            c.GetDeviceByName("rgbstrip").GetValueStr(),
-				ACModeVal:              ac[0],
-				ACTempertureVal:        ac[1],
-				ACModeOptions:          c.GetDeviceByName("ir_ac_aircool").GetOptions("mode"),
-				ACTempertureOptions:    c.GetDeviceByName("ir_ac_aircool").GetOptions("temp"),
-				RGBOptions:             c.GetDeviceByName("rgbstrip").GetOptions(""),
-				CameraStatus:           clientCam.GetDeviceByName("camera").GetValueStr(),
+				RGBName:                 rgbStripID,
+				ACName:                  irac,
+				DHTHumuditi:             dhth,
+				DHTTemperture:           dhtt,
+				CameraID:                cameraID,
+				RoomID:                  mainRomm,
+				DHTSensorHumudutyHTML:   fmt.Sprintf("<h2 class='text-success'>%s</h2>", c.GetDeviceByName(dhth).GetValueStr()),
+				DHTSensorTempertureHTML: fmt.Sprintf("<h2 class='text-success'>%s</h2>", c.GetDeviceByName(dhtt).GetValueStr()),
+				RGBStripVal:             c.GetDeviceByName(rgbStripID).GetValueStr(),
+				ACModeVal:               ac[0],
+				ACTempertureVal:         ac[1],
+				ACModeOptions:           c.GetDeviceByName(irac).GetOptions("mode"),
+				ACTempertureOptions:     c.GetDeviceByName(irac).GetOptions("temp"),
+				RGBOptions:              c.GetDeviceByName(rgbStripID).GetOptions(""),
+				CameraStatus:            fmt.Sprintf("<h2 class='text-success'>%s</h2>", clientCam.GetDeviceByName(cameraID).GetValueStr()),
 			}
 			err := templates.ExecuteTemplate(w, "room.html", d) //execute the template and pass it the HomePageVars struct to fill in the gaps
 			if err != nil {                                     // if there is an error

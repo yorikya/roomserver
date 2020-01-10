@@ -7,7 +7,7 @@
             <div class="text-center">
                 <img src="/static/roomhtml/Temperture.png" class="rounded mx-auto d-block" alt="Responsive image">
             </div>
-            <div class="text-center"><h2 class="text-success">{{.DHTSensorTempertureVal}}<h2></div>
+            <div class="text-center" id="{{.DHTTemperture}}">{{.DHTSensorTempertureHTML}}</div>
             </br>
 
         </div>
@@ -18,7 +18,7 @@
                     <img src="/static/roomhtml/Humuduty.png" class="rounded mx-auto d-block" alt="Responsive image">
                 </div>
                 
-                <div class="text-center"><h2 class="text-success">{{.DHTSensorHumudutyVal}}<h2></div>     
+                <div class="text-center" id="{{.DHTHumuditi}}" >{{.DHTSensorHumudutyHTML}}</div>     
                 </br> 
         </div>
         
@@ -79,48 +79,60 @@
             <div class="text-center">
                 <img src="/static/roomhtml/NoSignal.jpeg" class="img-fluid" alt="Responsive image">
             </div>
-            <div class="text-center"><h2 class="text-success">{{.CameraStatus}}<h2></div>
+            <div class="text-center" id="{{.CameraID}}">{{.CameraStatus}}</div>
             </br>
         </div>
     </div>
 </div>
    
    <script>
-        var rgb_strip = $( "#rgb_strip" );
-        var ac_mode = $( "#ac_mode" );
-        var ac_temp = $( "#ac_temp" );
-
+       //Websocket connection
         if (window["WebSocket"]) {
             conn = new WebSocket("ws://" + document.location.host + "/ws");
             conn.onclose = function (evt) {
                 console.log("close connection", evt);
             };
             conn.onmessage = function (evt) {
-                var messages = evt.data;
-                console.log("message:", messages);
+                var messages = evt.data.split("/"); // ["room1_main","update", "dht_Temperture","text-success","43.4"]
+                var roomID = messages[0];
+                if (roomID === "{{.RoomID}}") {
+                    var action = messages[1];
+                    switch(action) {
+                    case "update":   //                        text style            value
+                        $("#"+ messages[2]).html("<h2 class='" + messages[3] +"'>"+messages[4]+"</h2>");
+                        break;
+                    default:
+                        console.log("unknown action", action);                
+                    }
+
+                } 
                 
             };
             conn.onerror = function(event) {
                 console.log("WebSocket error observed:", event);
             };
+            console.log("connect to web socket", conn);
         } else {
-            var item = document.createElement("div");
-            item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-            console.log(item);
+            
+            console.log("brouser npt accept web soccets");
         }
         
+        var rgb_strip = $( "#rgb_strip" );
+        var ac_mode = $( "#ac_mode" );
+        var ac_temp = $( "#ac_temp" );
+
         function sendRGB() {
-            var url = "/action?roomid={{.RoomID}}_main&deviceid={{.RGBName}}&action=" + rgb_strip.val();
+            var url = "/action?roomid={{.RoomID}}&deviceid={{.RGBName}}&action=" + rgb_strip.val();
             $.get(url , function( data ) {
-                    alert( "Data Loaded: " + data );
+                    // alert( "Data Loaded: " + data );
             });
             
         }   
 
         function sendAC() {
-            var url = "/action?roomid={{.RoomID}}_main&deviceid={{.ACName}}&action=" + ac_mode.val()+"_"+ac_temp.val();
+            var url = "/action?roomid={{.RoomID}}&deviceid={{.ACName}}&action=" + ac_mode.val()+"_"+ac_temp.val();
             $.get(url , function( data ) {
-                    alert( "Data Loaded: " + data );
+                    // alert( "Data Loaded: " + data );
             });
             
         }   
