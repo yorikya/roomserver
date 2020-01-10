@@ -86,6 +86,12 @@
 </div>
    
    <script>
+    //    SensorFMT //
+        function formatSensor(style, val) {
+            var sensorFmtLst = "{{.SensorFMT}}".split("%s");  //"<h2 class='%s'>%s</h2>"
+            return sensorFmtLst[0] + style + sensorFmtLst[1] + val + sensorFmtLst[2];
+        }
+
        //Websocket connection
         if (window["WebSocket"]) {
             conn = new WebSocket("ws://" + document.location.host + "/ws");
@@ -94,12 +100,13 @@
             };
             conn.onmessage = function (evt) {
                 var messages = evt.data.split("/"); // ["room1_main","update", "dht_Temperture","text-success","43.4"]
+                console.log("the message ", messages);
                 var roomID = messages[0];
                 if (roomID === "{{.RoomID}}") {
                     var action = messages[1];
                     switch(action) {
                     case "update":   //                        text style            value
-                        $("#"+ messages[2]).html("<h2 class='" + messages[3] +"'>"+messages[4]+"</h2>");
+                        $("#"+ messages[2]).html(formatSensor(messages[3],messages[4]));
                         break;
                     default:
                         console.log("unknown action", action);                

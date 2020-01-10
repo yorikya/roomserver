@@ -2,7 +2,6 @@ package devices
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/smira/go-statsd"
 )
@@ -13,7 +12,10 @@ type Camera struct {
 	Sensor   string
 	ValueStr string
 	value    float64
-	mu       *sync.Mutex
+}
+
+func (_ *Camera) InRangeThreshold() bool {
+	return false
 }
 
 func (_ *Camera) CreateCMD(cmd string) (string, string, error) {
@@ -37,14 +39,7 @@ func (s *Camera) GetOptions(_ string) []string {
 }
 
 func (s *Camera) SetValue(newValstr string) error {
-	// newValue, err := strconv.ParseFloat(newValstr, 64)
-	// if err != nil {
-	// 	return fmt.Errorf("NewHDTSensor SetValue error parse float %s", err)
-	// }
-	// s.mu.Lock()
-	// s.ValueStr = newValstr
-	// s.value = newValue
-	// s.mu.Unlock()
+
 	return nil
 }
 
@@ -61,7 +56,6 @@ func NewCamera(id, sensor string) *Camera {
 		ID:       id,
 		Name:     Camera2MP,
 		Sensor:   sensor,
-		mu:       &sync.Mutex{},
 		ValueStr: "Not Connected",
 	}
 }

@@ -193,6 +193,10 @@ type IRACAirCool struct {
 	codes    []IRCode
 }
 
+func (_ *IRACAirCool) InRangeThreshold() bool {
+	return false
+}
+
 func (s *IRACAirCool) getIRCode(tag string) (IRCode, bool) {
 	if !strings.HasPrefix(tag, "COOL") && !strings.HasPrefix(tag, "HEAT") {
 		tag = strings.Split(tag, "_")[0]

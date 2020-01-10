@@ -95,6 +95,10 @@ func (s *RGBStrip) SendStats(c *statsd.Client) {
 	log.Println("RGB need implement this function")
 }
 
+func (_ *RGBStrip) InRangeThreshold() bool {
+	return false
+}
+
 func NewRGBStrip(id, sensor string) *RGBStrip {
 	return &RGBStrip{
 		ID:       id,

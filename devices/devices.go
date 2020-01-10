@@ -27,6 +27,7 @@ type Device interface {
 	GetName() string
 	GetSensor() string
 	GetValueStr() string
+	InRangeThreshold() bool
 	GetOptions(string) []string
 	SetValue(string) error
 	CreateCMD(string) (string, string, error)
@@ -38,9 +39,9 @@ func NewDevices(roomName string, roomCfg *config.Room) []Device {
 	for _, device := range roomCfg.Devices {
 		switch device.Name {
 		case DHT_Humidity:
-			sens = append(sens, NewDHTHumiditySensor(roomName, device.Sensor))
+			sens = append(sens, NewDHTHumiditySensor(roomName, device.Sensor, device.GoodRange))
 		case DHT_Temperature:
-			sens = append(sens, NewDHTTemperatureSensor(roomName, device.Sensor))
+			sens = append(sens, NewDHTTemperatureSensor(roomName, device.Sensor, device.GoodRange))
 		case RGBstrip:
 			sens = append(sens, NewRGBStrip(roomName, device.Sensor))
 		case IR_ac_aircool:

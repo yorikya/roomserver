@@ -2,17 +2,25 @@ package devices
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/smira/go-statsd"
 )
 
 type HDTSensor struct {
-	ID       string
-	Name     string
-	Sensor   string
-	ValueStr string
-	value    float64
+	ID               string
+	Name             string
+	Sensor           string
+	ValueStr         string
+	value, goodRange float64
+}
+
+func (s *HDTSensor) InRangeThreshold() bool {
+	if math.Abs(s.value-s.goodRange) <= 2.0 {
+		return true
+	}
+	return false
 }
 
 func (_ *HDTSensor) CreateCMD(cmd string) (string, string, error) {
@@ -53,20 +61,22 @@ func (s *HDTSensor) SendStats(c *statsd.Client) {
 	c.FGauge(fmt.Sprintf("%s.%s", s.Name, s.Sensor), s.value)
 }
 
-func NewDHTHumiditySensor(id, sensor string) *HDTSensor {
+func NewDHTHumiditySensor(id, sensor string, goodRange float64) *HDTSensor {
 	return &HDTSensor{
-		ID:       id,
-		Name:     DHT_Humidity,
-		Sensor:   sensor,
-		ValueStr: "UNSET",
+		ID:        id,
+		Name:      DHT_Humidity,
+		Sensor:    sensor,
+		ValueStr:  "UNSET",
+		goodRange: goodRange,
 	}
 }
 
-func NewDHTTemperatureSensor(id, sensor string) *HDTSensor {
+func NewDHTTemperatureSensor(id, sensor string, goodRange float64) *HDTSensor {
 	return &HDTSensor{
-		ID:       id,
-		Name:     DHT_Temperature,
-		Sensor:   sensor,
-		ValueStr: "UNSET",
+		ID:        id,
+		Name:      DHT_Temperature,
+		Sensor:    sensor,
+		ValueStr:  "UNSET",
+		goodRange: goodRange,
 	}
 }

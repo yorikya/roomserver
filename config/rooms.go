@@ -7,8 +7,9 @@ import (
 )
 
 type Device struct {
-	Name   string `json:"name"`
-	Sensor string `json:"sensor"`
+	Name      string  `json:"name"`
+	Sensor    string  `json:"sensor"`
+	GoodRange float64 `json:"goodRange"`
 }
 
 type Room struct {
