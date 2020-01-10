@@ -2,7 +2,6 @@ package devices
 
 import (
 	"log"
-	"sync"
 	"strconv"
 	"strings"
 	"sort"
@@ -191,7 +190,6 @@ type IRACAirCool struct {
 	Sensor   string
 	ValueStr string
 	value    float64
-	mu       *sync.Mutex
 	codes    []IRCode
 }
 
@@ -229,9 +227,7 @@ func (s *IRACAirCool) GetName() string {
 }
 
 func (s *IRACAirCool) SetValue(newValstr string) error {
-	s.mu.Lock()
 	s.ValueStr = newValstr
-	s.mu.Unlock()
 	return nil
 }
 
@@ -277,9 +273,8 @@ func (s *IRACAirCool) SendStats(c *statsd.Client) {
 func NewIRACAirCool(id, sensor string) *IRACAirCool {
 	return &IRACAirCool{
 		ID:     id,
-		Name:   "ir_ac_aircool",
+		Name:   IR_ac_aircool,
 		Sensor: sensor,
-		mu:     &sync.Mutex{},
 		codes:  airCoolCodes,
 		ValueStr: "UNSET,UNSET",
 	}

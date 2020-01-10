@@ -51,8 +51,10 @@ String irACAirCool;
 #define BLUE_LED 0
 
 #include <DHT.h>
-#define DHTPIN 3     // what pin we're connected to
+#define DHTPIN 5     // what pin we're connected to
 #define DHTTYPE DHT22   // DHT 22  (AM2302)
+
+DHT dht(DHTPIN, DHTTYPE, 11); //// Initialize DHT sensor for normal 16mhz Arduino
 
 // --- Logger 
 #define LOGSSIZE 50

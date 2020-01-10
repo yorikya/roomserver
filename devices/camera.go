@@ -59,7 +59,7 @@ func (s *Camera) SendStats(c *statsd.Client) {
 func NewCamera(id, sensor string) *Camera {
 	return &Camera{
 		ID:       id,
-		Name:     "camera",
+		Name:     Camera2MP,
 		Sensor:   sensor,
 		mu:       &sync.Mutex{},
 		ValueStr: "Not Connected",

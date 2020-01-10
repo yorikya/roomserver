@@ -3,7 +3,6 @@ package devices
 import (
 	"fmt"
 	"strconv"
-	"sync"
 
 	"github.com/smira/go-statsd"
 )
@@ -14,7 +13,6 @@ type HDTSensor struct {
 	Sensor   string
 	ValueStr string
 	value    float64
-	mu       *sync.Mutex
 }
 
 func (_ *HDTSensor) CreateCMD(cmd string) (string, string, error) {
@@ -42,10 +40,8 @@ func (s *HDTSensor) SetValue(newValstr string) error {
 	if err != nil {
 		return fmt.Errorf("NewHDTSensor SetValue error parse float %s", err)
 	}
-	s.mu.Lock()
 	s.ValueStr = newValstr
 	s.value = newValue
-	s.mu.Unlock()
 	return nil
 }
 
@@ -60,9 +56,8 @@ func (s *HDTSensor) SendStats(c *statsd.Client) {
 func NewDHTHumiditySensor(id, sensor string) *HDTSensor {
 	return &HDTSensor{
 		ID:       id,
-		Name:     "dht_Humidity",
+		Name:     DHT_Humidity,
 		Sensor:   sensor,
-		mu:       &sync.Mutex{},
 		ValueStr: "UNSET",
 	}
 }
@@ -70,9 +65,8 @@ func NewDHTHumiditySensor(id, sensor string) *HDTSensor {
 func NewDHTTemperatureSensor(id, sensor string) *HDTSensor {
 	return &HDTSensor{
 		ID:       id,
-		Name:     "dht_Temperature",
+		Name:     DHT_Temperature,
 		Sensor:   sensor,
-		mu:       &sync.Mutex{},
 		ValueStr: "UNSET",
 	}
 }

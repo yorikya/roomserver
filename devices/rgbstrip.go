@@ -3,7 +3,6 @@ package devices
 import (
 	"fmt"
 	"log"
-	"sync"
 
 	"github.com/smira/go-statsd"
 )
@@ -43,7 +42,6 @@ type RGBStrip struct {
 	Sensor   string
 	ValueStr string
 	value    float64
-	mu       *sync.Mutex
 	colors   []RGBColor
 }
 
@@ -77,9 +75,7 @@ func (s *RGBStrip) GetName() string {
 }
 
 func (s *RGBStrip) SetValue(newValstr string) error {
-	s.mu.Lock()
 	s.ValueStr = newValstr
-	s.mu.Unlock()
 	return nil
 }
 
@@ -102,9 +98,8 @@ func (s *RGBStrip) SendStats(c *statsd.Client) {
 func NewRGBStrip(id, sensor string) *RGBStrip {
 	return &RGBStrip{
 		ID:       id,
-		Name:     "rgbstrip",
+		Name:     RGBstrip,
 		Sensor:   sensor,
-		mu:       &sync.Mutex{},
 		colors:   stripColors,
 		ValueStr: "UNSET",
 	}

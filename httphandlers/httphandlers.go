@@ -64,13 +64,6 @@ func withServerAction(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 					return
 				}
 
-				//TODO: Should be after get success response from client
-				if err = s.RoomHub.Brodcast(fmt.Sprintf("%s/update/dht_Humidity/text-success/43.4", roomID)); err != nil {
-					log.Println("failed broadcast message")
-					fmt.Fprintln(w, err)
-					return
-				}
-
 				url := fmt.Sprintf("http://%s/action?deviceid=%s&val=%s&cmd=%s", c.IPstr, deviceID, val, cmd)
 				log.Println("the client action url:", url)
 				res, err := http.Get(url)
@@ -119,17 +112,17 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 		}
 		mainRomm := fmt.Sprintf("%s_main", name)
 		if c := s.GetClient(mainRomm); c != nil {
-			cameraID := "camera"
+			cameraID := devices.Camera2MP
 			camroom := fmt.Sprintf("%s_cam", name)
 			clientCam := s.GetClient(camroom)
 			if clientCam == nil {
 				log.Printf("room '%s' does not have cammera (%s), init default camera", name, camroom)
 				clientCam = client.NewClient(camroom, devices.NewCamera(camroom, cameraID))
 			}
-			rgbStripID := "rgbstrip"
-			irac := "ir_ac_aircool"
-			dhth := "dht_Humidity"
-			dhtt := "dht_Temperature"
+			rgbStripID := devices.RGBstrip
+			irac := devices.IR_ac_aircool
+			dhth := devices.DHT_Humidity
+			dhtt := devices.DHT_Temperature
 			ac := strings.Split(c.GetDeviceByName(irac).GetValueStr(), ",")
 			d := struct {
 				RoomID,
@@ -253,6 +246,11 @@ func withServerUpdate(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 			}
 
 			c.Update(device, value)
+			if err = s.RoomHub.Brodcast(fmt.Sprintf("%s/update/%s/text-success/%s", clientid, device, value)); err != nil {
+				log.Println("failed broadcast message")
+				fmt.Fprintln(w, err)
+				return
+			}
 			return
 		}
 		err = fmt.Errorf("server dos not have clientID: %s", clientid)

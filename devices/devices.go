@@ -9,17 +9,17 @@ const (
 	//Custom command
 	CUSTOM = "CUSTOM"
 	//DHT22 sensor
-	dht_Humidity    = "dht_Humidity"
-	dht_Temperature = "dht_Temperature"
+	DHT_Humidity    = "dht_Humidity"
+	DHT_Temperature = "dht_Temperature"
 
 	//RGB Strip
-	rgbstrip = "rgbstrip"
+	RGBstrip = "rgbstrip"
 
 	//AC Air Cool IR
-	ir_ac_aircool = "ir_ac_aircool"
+	IR_ac_aircool = "ir_ac_aircool"
 
 	//Video camera
-	camera = "camera"
+	Camera2MP = "camera"
 )
 
 type Device interface {
@@ -37,15 +37,15 @@ func NewDevices(roomName string, roomCfg *config.Room) []Device {
 	sens := []Device{}
 	for _, device := range roomCfg.Devices {
 		switch device.Name {
-		case dht_Humidity:
+		case DHT_Humidity:
 			sens = append(sens, NewDHTHumiditySensor(roomName, device.Sensor))
-		case dht_Temperature:
+		case DHT_Temperature:
 			sens = append(sens, NewDHTTemperatureSensor(roomName, device.Sensor))
-		case rgbstrip:
+		case RGBstrip:
 			sens = append(sens, NewRGBStrip(roomName, device.Sensor))
-		case ir_ac_aircool:
+		case IR_ac_aircool:
 			sens = append(sens, NewIRACAirCool(roomName, device.Sensor))
-		case camera:
+		case Camera2MP:
 			sens = append(sens, NewCamera(roomName, device.Sensor))
 		}
 	}

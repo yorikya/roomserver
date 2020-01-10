@@ -5,7 +5,6 @@ import (
 	"log"
 	"strings"
 
-	"sync"
 	"time"
 
 	"github.com/smira/go-statsd"
@@ -16,7 +15,6 @@ type Client struct {
 	roomID, ClientID, IPstr string
 	LastSeen                time.Time
 	stats                   *statsd.Client
-	mu                      *sync.Mutex
 	Devices                 []devices.Device
 }
 
@@ -25,7 +23,6 @@ func NewClient(clientID string, d ...devices.Device) *Client {
 	return &Client{
 		roomID:   strings.Split(clientID, "_")[0],
 		Devices:  d,
-		mu:       &sync.Mutex{},
 		ClientID: clientID,
 		stats:    statsd.NewClient("localhost:8125", statsd.MaxPacketSize(1400), statsd.MetricPrefix(fmt.Sprintf("home.%s.", clientID))),
 	}
@@ -38,18 +35,14 @@ func (c *Client) GetRoomID() string {
 func (c *Client) UpdateIPstr(ip string) {
 	if c.IPstr != ip {
 		log.Printf("clientID: %s, change IP from: '%s', to: '%s'\n", c.ClientID, c.IPstr, ip)
-		c.mu.Lock()
 		c.IPstr = ip
-		c.mu.Unlock()
 	}
 }
 
 func (c *Client) Update(device, value string) {
 	//device, sensor, value => hdt/Humidity/30.40
 	c.stats.Incr("update", 1)
-	c.mu.Lock()
 	c.LastSeen = time.Now()
-	c.mu.Unlock()
 	if device == "keepalive" {
 		log.Println("client: ", c.ClientID, "keepalive message")
 		return

@@ -72,7 +72,6 @@ func (h *Hub) run() {
 				delete(h.clients, client)
 			}
 		case message := <-h.broadcast:
-			log.Println("get brodcast message, brodcasting", message)
 			for client := range h.clients {
 				if err := client.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
 					log.Printf("get error when send ws data, error: %s\n", err)
