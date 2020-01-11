@@ -65,3 +65,23 @@ func (c *Client) GetDeviceByName(name string) devices.Device {
 	}
 	return nil
 }
+
+func (c *Client) GetDHTHumidity() devices.Device {
+	return c.GetDeviceByName(devices.DHT_Humidity)
+}
+
+func (c *Client) GetDHTTemperature() devices.Device {
+	return c.GetDeviceByName(devices.DHT_Temperature)
+}
+
+func (c *Client) GetRGBstrip() devices.Device {
+	return c.GetDeviceByName(devices.RGBstrip)
+}
+
+func (c *Client) GetIR_ac_aircool() devices.Device {
+	return c.GetDeviceByName(devices.IR_ac_aircool)
+}
+
+func (c *Client) GetCamera2MP() devices.Device {
+	return c.GetDeviceByName(devices.Camera2MP)
+}
