@@ -1,6 +1,11 @@
 {{ template "header.html" . }}
 <div class="view" style="background-image: url('/static/roomhtml/Home.jpeg'); background-repeat: no-repeat; background-size: cover; background-position: center center;">
     <div class="row">
+        <div style=" color:#000000; border: 4px solid 	#F5F5F5 ; border-radius: 25px;" class="col-md-12">
+            .col-md-12
+        </div>
+    </div>
+    <div class="row">
         <div style=" color:#000000; border: 4px solid 	#F5F5F5 ; border-radius: 25px;" class="col-md-6">
             <div class="text-center"><u><h1>Temperature</h1></u></div>
             </br>
@@ -27,9 +32,6 @@
         <div  style="color:#000000; border: 4px solid 	#F5F5F5; border-radius: 25px;" class="col-md-6">
                 <div class="text-center"><u><h1>RGB Strip</h1></u></div>
                 </br>
-                <div class="text-left" >
-                    <h2>Color</h2>
-                </div>
                 <div class="text-left" id="{{.RGBName}}">
                     {{.RGBStripHTML}}
                 </div>
@@ -54,18 +56,9 @@
         <div style="color:#000000; border: 4px solid 	#F5F5F5; border-radius: 25px;" class="col-md-6">
             <div class="text-center"><u><h1>Air Conditioner</h1></u></div>
             </br>
-            <div class="text-left" >
-                <h2>Mode</h2>
-            </div>
-            <div class="text-left" >
-                {{.ACModeHTML}}
-            </div>
 
-            <div class="text-left" >
-                <h2>Temperature</h2>
-            </div>
-            <div class="text-left" >
-                {{.ACTempertureHTML}}
+            <div class="text-left" id="{{.ACName}}">
+                {{.ACStatusHTML}}
             </div>
 
             </br>

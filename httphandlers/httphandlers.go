@@ -78,7 +78,7 @@ func withServerAction(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 					fmt.Fprintln(w, err)
 					return
 				}
-				if err = s.RoomHub.Brodcast(fmt.Sprintf("%s/update/%s/%s/%s", roomID, deviceID, getStyleSuccessOrFailText(c.GetDeviceByName(deviceID).InRangeThreshold()), c.GetDeviceByName(deviceID).GetValueStr())); err != nil {
+				if err = s.RoomHub.Brodcast(fmt.Sprintf("%s/update/%s/%s/%s", roomID, deviceID, getStyleSuccessOrFailText(c.GetDeviceByName(deviceID).InRangeThreshold()), action)); err != nil {
 					log.Println("failed broadcast message")
 					fmt.Fprintln(w, err)
 					return
@@ -127,7 +127,7 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 				log.Printf("room '%s' does not have cammera (%s), init default camera", name, camroom)
 				clientCam = client.NewClient(camroom, devices.NewCamera(camroom, devices.Camera2MP))
 			}
-			ac := strings.Split(c.GetDeviceByName(devices.IR_ac_aircool).GetValueStr(), ",")
+			ac := c.GetDeviceByName(devices.IR_ac_aircool).GetValueStr()
 			d := struct {
 				RoomID,
 				DHTHumuditi,
@@ -137,8 +137,7 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 				DHTSensorHumudutyHTML,
 				DHTSensorTempertureHTML,
 				RGBStripHTML,
-				ACModeHTML,
-				ACTempertureHTML,
+				ACStatusHTML,
 				CameraStatus,
 				ACName,
 				RGBName string
@@ -157,8 +156,7 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 				DHTSensorHumudutyHTML:   newH2GreenSRedF(c.GetDHTHumidity().InRangeThreshold(), c.GetDHTHumidity().GetValueStr()),
 				DHTSensorTempertureHTML: newH2GreenSRedF(c.GetDHTTemperature().InRangeThreshold(), c.GetDHTTemperature().GetValueStr()),
 				RGBStripHTML:            newH2(stylColBlack, c.GetRGBstrip().GetValueStr()),
-				ACModeHTML:              newH2(stylColBlack, ac[0]),
-				ACTempertureHTML:        newH2(stylColBlack, ac[1]),
+				ACStatusHTML:            newH2(stylColBlack, ac),
 				ACModeOptions:           c.GetIR_ac_aircool().GetOptions("mode"),
 				ACTempertureOptions:     c.GetIR_ac_aircool().GetOptions("temp"),
 				RGBOptions:              c.GetRGBstrip().GetOptions(""),
