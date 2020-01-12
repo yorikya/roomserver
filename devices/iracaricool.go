@@ -224,11 +224,11 @@ func (s *IRACAirCool) CreateCMD(cmd string) (string, string, []string, error) {
 	if ok {
 		cmdMsg := []string{}
 		ac := sliceTag(code.GetTag())
-		cmdMsg = append(cmdMsg,  UpdateMsg(s.RoomName, ACMode(s.Name), style.GetTextStyle(style.StylColGreen), ac[0]))
+		cmdMsg = append(cmdMsg,  UpdateMsg(s.RoomName, style.ACModeID(s.Name), style.GetTextStyle(style.StylColGreen), ac[0]))
 		if len(ac) > 1 {
-			cmdMsg = append(cmdMsg,  UpdateMsg(s.RoomName, ACTemp(s.Name), style.GetTextStyle(style.StylColGreen), ac[1]))
+			cmdMsg = append(cmdMsg,  UpdateMsg(s.RoomName, style.ACTempID(s.Name), style.GetTextStyle(style.StylColGreen), ac[1]))
 		} else {
-			cmdMsg = append(cmdMsg,  UpdateMsg(s.RoomName, ACTemp(s.Name), style.GetTextStyle(style.StylColGreen), ""))
+			cmdMsg = append(cmdMsg,  UpdateMsg(s.RoomName, style.ACTempID(s.Name), style.GetTextStyle(style.StylColGreen), ""))
 		}
 		return code.ToCMD(), code.GetTag(), cmdMsg, nil
 	}

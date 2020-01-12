@@ -148,8 +148,8 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 			}{ //For device name see rooms.json config
 				RGBName:                 c.GetRGBstrip().GetName(),
 				ACName:                  c.GetIR_ac_aircool().GetName(),
-				ACModeName:              devices.ACMode(c.GetIR_ac_aircool().GetName()),
-				ACTempName:              devices.ACTemp(c.GetIR_ac_aircool().GetName()),
+				ACModeName:              style.ACModeID(c.GetIR_ac_aircool().GetName()),
+				ACTempName:              style.ACTempID(c.GetIR_ac_aircool().GetName()),
 				DHTHumuditi:             c.GetDHTHumidity().GetName(),
 				DHTTemperture:           c.GetDHTTemperature().GetName(),
 				CameraID:                clientCam.GetCamera2MP().GetName(),

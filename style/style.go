@@ -51,3 +51,11 @@ func NewH2GreenSRedF(success bool, value string) string {
 	}
 	return NewH2(StylColRed, value)
 }
+
+func ACModeID(acID string) string {
+	return fmt.Sprintf("%s-mode", acID)
+}
+
+func ACTempID(acID string) string {
+	return fmt.Sprintf("%s-temp", acID)
+}
