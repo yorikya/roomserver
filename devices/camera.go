@@ -7,7 +7,7 @@ import (
 )
 
 type Camera struct {
-	ID       string
+	RoomName string
 	Name     string
 	Sensor   string
 	ValueStr string
@@ -18,12 +18,12 @@ func (_ *Camera) InRangeThreshold() bool {
 	return false
 }
 
-func (_ *Camera) CreateCMD(cmd string) (string, string, error) {
-	return cmd, CUSTOM, nil
+func (_ *Camera) CreateCMD(cmd string) (string, string, []string, error) {
+	return cmd, CUSTOM, []string{}, nil
 }
 
-func (s *Camera) GetID() string {
-	return s.ID
+func (s *Camera) GetRoomName() string {
+	return s.RoomName
 }
 
 func (s *Camera) GetSensor() string {
@@ -51,9 +51,9 @@ func (s *Camera) SendStats(c *statsd.Client) {
 	c.FGauge(fmt.Sprintf("%s.%s", s.Name, s.Sensor), s.value)
 }
 
-func NewCamera(id, sensor string) *Camera {
+func NewCamera(roomName, sensor string) *Camera {
 	return &Camera{
-		ID:       id,
+		RoomName: roomName,
 		Name:     Camera2MP,
 		Sensor:   sensor,
 		ValueStr: "Not Connected",

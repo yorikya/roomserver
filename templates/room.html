@@ -57,8 +57,14 @@
             <div class="text-center"><u><h1>Air Conditioner</h1></u></div>
             </br>
 
-            <div class="text-left" id="{{.ACName}}">
-                {{.ACStatusHTML}}
+            <label for="ACMode">Mode</label>
+            <div class="text-left" id="{{.ACModeName}}">
+                {{.ACModeHTML}}
+            </div>
+
+            <label for="ACTemp">Temp</label>
+            <div class="text-left" id="{{.ACTempName}}">
+                {{.ACTempHTML}}
             </div>
 
             </br>

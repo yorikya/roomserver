@@ -5,8 +5,8 @@
         "devices": [ 
           {"name":"rgbstrip", "sensor":"rgb"},
           {"name":"ir_ac_aircool", "sensor":"ir"},
-          {"name":"dht_Humidity", "sensor":"Humidity", "goodRange":40.0},
-          {"name":"dht_Temperature", "sensor":"Temperature", "goodRange":23.0}
+          {"name":"dht_Humidity", "sensor":"Humidity", "threshold":40.0},
+          {"name":"dht_Temperature", "sensor":"Temperature", "threshold":23.0}
          ]
       },
       {

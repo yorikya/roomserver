@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/smira/go-statsd"
+	"github.com/yorikya/roomserver/style"
 )
 
 var (
@@ -37,7 +38,7 @@ func (c RGBColor) GetTag() string {
 }
 
 type RGBStrip struct {
-	ID       string
+	RoomName string
 	Name     string
 	Sensor   string
 	ValueStr string
@@ -54,16 +55,17 @@ func (s *RGBStrip) getColor(tag string) (RGBColor, bool) {
 	return RGBColor{}, false
 }
 
-func (s *RGBStrip) CreateCMD(cmd string) (string, string, error) {
+func (s *RGBStrip) CreateCMD(cmd string) (string, string, []string, error) {
 	col, ok := s.getColor(cmd)
 	if ok {
-		return col.ToCMD(), col.GetTag(), nil
+		msg := UpdateMsg(s.RoomName, s.Name, style.GetTextStyle(style.StylColGreen), col.GetTag())
+		return col.ToCMD(), col.GetTag(), []string{msg}, nil
 	}
-	return cmd, CUSTOM, nil
+	return cmd, CUSTOM, []string{}, nil
 }
 
-func (s *RGBStrip) GetID() string {
-	return s.ID
+func (s *RGBStrip) GetRoomName() string {
+	return s.RoomName
 }
 
 func (s *RGBStrip) GetSensor() string {
@@ -99,9 +101,9 @@ func (_ *RGBStrip) InRangeThreshold() bool {
 	return false
 }
 
-func NewRGBStrip(id, sensor string) *RGBStrip {
+func NewRGBStrip(roomName, sensor string) *RGBStrip {
 	return &RGBStrip{
-		ID:       id,
+		RoomName: roomName,
 		Name:     RGBstrip,
 		Sensor:   sensor,
 		colors:   stripColors,

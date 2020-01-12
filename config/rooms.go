@@ -9,7 +9,7 @@ import (
 type Device struct {
 	Name      string  `json:"name"`
 	Sensor    string  `json:"sensor"`
-	GoodRange float64 `json:"goodRange"`
+	Threshold float64 `json:"threshold"`
 }
 
 type Room struct {

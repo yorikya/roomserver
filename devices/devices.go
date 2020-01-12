@@ -1,11 +1,15 @@
 package devices
 
 import (
+	"fmt"
 	"github.com/smira/go-statsd"
 	"github.com/yorikya/roomserver/config"
 )
 
 const (
+	//Update message format
+	updateMsgFmt = "%s/update/%s/%s/%s" // ex: room1/update/rgbstrip/text-success/LUM_1900
+
 	//Custom command
 	CUSTOM = "CUSTOM"
 	//DHT22 sensor
@@ -23,14 +27,14 @@ const (
 )
 
 type Device interface {
-	GetID() string
+	GetRoomName() string
 	GetName() string
 	GetSensor() string
 	GetValueStr() string
 	InRangeThreshold() bool
 	GetOptions(string) []string
 	SetValue(string) error
-	CreateCMD(string) (string, string, error)
+	CreateCMD(string) (string, string, []string, error)
 	SendStats(*statsd.Client)
 }
 
@@ -39,9 +43,9 @@ func NewDevices(roomName string, roomCfg *config.Room) []Device {
 	for _, device := range roomCfg.Devices {
 		switch device.Name {
 		case DHT_Humidity:
-			sens = append(sens, NewDHTHumiditySensor(roomName, device.Sensor, device.GoodRange))
+			sens = append(sens, NewDHTHumiditySensor(roomName, device.Sensor, device.Threshold))
 		case DHT_Temperature:
-			sens = append(sens, NewDHTTemperatureSensor(roomName, device.Sensor, device.GoodRange))
+			sens = append(sens, NewDHTTemperatureSensor(roomName, device.Sensor, device.Threshold))
 		case RGBstrip:
 			sens = append(sens, NewRGBStrip(roomName, device.Sensor))
 		case IR_ac_aircool:
@@ -51,4 +55,16 @@ func NewDevices(roomName string, roomCfg *config.Room) []Device {
 		}
 	}
 	return sens
+}
+
+func UpdateMsg(roomName, deviceID, textStyle, value string) string {
+	return fmt.Sprintf(updateMsgFmt, roomName, deviceID, textStyle, value)
+}
+
+func ACMode(acID string) string {
+	return fmt.Sprintf("%s-mode", acID)
+}
+
+func ACTemp(acID string) string {
+	return fmt.Sprintf("%s-temp", acID)
 }

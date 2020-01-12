@@ -9,7 +9,7 @@ import (
 )
 
 type HDTSensor struct {
-	ID               string
+	RoomName         string
 	Name             string
 	Sensor           string
 	ValueStr         string
@@ -23,12 +23,12 @@ func (s *HDTSensor) InRangeThreshold() bool {
 	return false
 }
 
-func (_ *HDTSensor) CreateCMD(cmd string) (string, string, error) {
-	return cmd, CUSTOM, nil
+func (_ *HDTSensor) CreateCMD(cmd string) (string, string, []string, error) {
+	return cmd, CUSTOM, []string{}, nil
 }
 
-func (s *HDTSensor) GetID() string {
-	return s.ID
+func (s *HDTSensor) GetRoomName() string {
+	return s.RoomName
 }
 
 func (s *HDTSensor) GetSensor() string {
@@ -61,9 +61,9 @@ func (s *HDTSensor) SendStats(c *statsd.Client) {
 	c.FGauge(fmt.Sprintf("%s.%s", s.Name, s.Sensor), s.value)
 }
 
-func NewDHTHumiditySensor(id, sensor string, goodRange float64) *HDTSensor {
+func NewDHTHumiditySensor(roomName, sensor string, goodRange float64) *HDTSensor {
 	return &HDTSensor{
-		ID:        id,
+		RoomName:  roomName,
 		Name:      DHT_Humidity,
 		Sensor:    sensor,
 		ValueStr:  "UNSET",
@@ -71,9 +71,9 @@ func NewDHTHumiditySensor(id, sensor string, goodRange float64) *HDTSensor {
 	}
 }
 
-func NewDHTTemperatureSensor(id, sensor string, goodRange float64) *HDTSensor {
+func NewDHTTemperatureSensor(roomName, sensor string, goodRange float64) *HDTSensor {
 	return &HDTSensor{
-		ID:        id,
+		RoomName:  roomName,
 		Name:      DHT_Temperature,
 		Sensor:    sensor,
 		ValueStr:  "UNSET",

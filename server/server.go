@@ -64,3 +64,11 @@ func NewServer(configPath string) *Server {
 func (s *Server) Close() {
 
 }
+
+func (s *Server) BrodcastHTMLClients(msgs ...string) {
+	for _, msg := range msgs {
+		if err := s.RoomHub.Brodcast(msg); err != nil {
+			log.Printf("failed broadcast message: '%s'", msg)
+		}
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"sort"
+	"github.com/yorikya/roomserver/style"
 
 	"github.com/smira/go-statsd"
 )
@@ -185,7 +186,7 @@ func (c IRCode) ToCMD() string {
 }
 
 type IRACAirCool struct {
-	ID       string
+	RoomName       string
 	Name     string
 	Sensor   string
 	ValueStr string
@@ -193,13 +194,21 @@ type IRACAirCool struct {
 	codes    []IRCode
 }
 
+func sliceTag(tag string) []string {
+	return strings.Split(tag, "_")
+}
+
+func coolHeatTag(tag string) bool {
+	return strings.HasPrefix(tag, "COOL") || strings.HasPrefix(tag, "HEAT") 
+}
+
 func (_ *IRACAirCool) InRangeThreshold() bool {
 	return false
 }
 
 func (s *IRACAirCool) getIRCode(tag string) (IRCode, bool) {
-	if !strings.HasPrefix(tag, "COOL") && !strings.HasPrefix(tag, "HEAT") {
-		tag = strings.Split(tag, "_")[0]
+	if !coolHeatTag(tag) {
+		tag = sliceTag(tag)[0]
 	} 
 	
 	for _, irc := range s.codes {
@@ -210,16 +219,24 @@ func (s *IRACAirCool) getIRCode(tag string) (IRCode, bool) {
 	return IRCode{}, false
 }
 
-func (s *IRACAirCool) CreateCMD(cmd string) (string, string, error) {
+func (s *IRACAirCool) CreateCMD(cmd string) (string, string, []string, error) {
 	code, ok := s.getIRCode(cmd)
 	if ok {
-		return code.ToCMD(), code.GetTag(), nil
+		cmdMsg := []string{}
+		ac := sliceTag(code.GetTag())
+		cmdMsg = append(cmdMsg,  UpdateMsg(s.RoomName, ACMode(s.Name), style.GetTextStyle(style.StylColGreen), ac[0]))
+		if len(ac) > 1 {
+			cmdMsg = append(cmdMsg,  UpdateMsg(s.RoomName, ACTemp(s.Name), style.GetTextStyle(style.StylColGreen), ac[1]))
+		} else {
+			cmdMsg = append(cmdMsg,  UpdateMsg(s.RoomName, ACTemp(s.Name), style.GetTextStyle(style.StylColGreen), ""))
+		}
+		return code.ToCMD(), code.GetTag(), cmdMsg, nil
 	}
-	return cmd, CUSTOM, nil
+	return cmd, CUSTOM, []string{}, nil
 }
 
-func (s *IRACAirCool) GetID() string {
-	return s.ID
+func (s *IRACAirCool) GetRoomName() string {
+	return s.RoomName
 }
 
 func (s *IRACAirCool) GetSensor() string {
@@ -274,9 +291,9 @@ func (s *IRACAirCool) SendStats(c *statsd.Client) {
 	log.Println("IR AC Air Cool, SendStats need implement this function")
 }
 
-func NewIRACAirCool(id, sensor string) *IRACAirCool {
+func NewIRACAirCool(roomName, sensor string) *IRACAirCool {
 	return &IRACAirCool{
-		ID:     id,
+		RoomName:     roomName,
 		Name:   IR_ac_aircool,
 		Sensor: sensor,
 		codes:  airCoolCodes,
