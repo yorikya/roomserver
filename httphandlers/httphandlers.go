@@ -127,6 +127,7 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 			ac := strings.Split(c.GetIR_ac_aircool().GetValueStr(), ",")
 			d := struct {
 				RoomID,
+				RoomName,
 				DHTHumuditi,
 				DHTTemperture,
 				CameraID,
@@ -155,6 +156,7 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 				CameraID:                clientCam.GetCamera2MP().GetName(),
 				SensorFMT:               style.H2Fmt,
 				RoomID:                  mainRomm,
+				RoomName:                name,
 				DHTSensorHumudutyHTML:   style.NewH2GreenSRedF(c.GetDHTHumidity().InRangeThreshold(), c.GetDHTHumidity().GetValueStr()),
 				DHTSensorTempertureHTML: style.NewH2GreenSRedF(c.GetDHTTemperature().InRangeThreshold(), c.GetDHTTemperature().GetValueStr()),
 				RGBStripHTML:            style.NewH2(style.StylColBlack, c.GetRGBstrip().GetValueStr()),

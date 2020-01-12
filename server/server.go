@@ -1,7 +1,9 @@
 package server
 
 import (
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/yorikya/roomserver/client"
 	"github.com/yorikya/roomserver/config"
@@ -10,8 +12,10 @@ import (
 )
 
 type Server struct {
-	clients map[string]*client.Client
-	RoomHub *hub.Hub
+	clients      map[string]*client.Client
+	RoomHub      *hub.Hub
+	clientOnline *time.Ticker
+	stopTicker   chan bool
 }
 
 func (s *Server) GetClients() map[string]*client.Client {
@@ -41,8 +45,10 @@ func (s *Server) GetClient(name string) *client.Client {
 
 func NewServer(configPath string) *Server {
 	s := &Server{
-		clients: make(map[string]*client.Client),
-		RoomHub: hub.NewHub(),
+		clients:      make(map[string]*client.Client),
+		RoomHub:      hub.NewHub(),
+		stopTicker:   make(chan bool),
+		clientOnline: time.NewTicker(time.Second * 10),
 	}
 	cfgRooms, err := config.ParseRooms(configPath)
 	if err != nil {
@@ -55,14 +61,46 @@ func NewServer(configPath string) *Server {
 			continue
 		}
 		s.clients[room.Name] = client.NewClient(room.Name, devices.NewDevices(room.Name, roomCfg)...)
+
 		log.Printf("client: %s was added, data: %+v\n", room.Name, s.clients[room.Name])
 	}
+
+	go func(s *Server) {
+		log.Println("start server online ticker.")
+		for {
+			select {
+			case <-s.stopTicker:
+				log.Println("close server ticker")
+				return
+			case _ = <-s.clientOnline.C:
+				for n, c := range s.clients {
+					tmpStatus := c.OnLine
+					c.OnLine = time.Since(c.LastSeen) < time.Second*20
+					if tmpStatus != c.OnLine {
+						log.Println("client ", n, "change online status from", tmpStatus, "to", c.OnLine)
+						if c.OnLine {
+							s.BrodcastHTMLClients(fmt.Sprintf("%s/status/OnLineGreen.jpeg", c.ClientID))
+						} else {
+							s.BrodcastHTMLClients(fmt.Sprintf("%s/status/OnLineRed.jpeg", c.ClientID))
+						}
+
+					}
+				}
+
+			}
+		}
+	}(s)
 
 	return s
 }
 
 func (s *Server) Close() {
-
+	for _, c := range s.clients {
+		c.Close()
+	}
+	s.stopTicker <- true
+	s.clientOnline.Stop()
+	log.Println("closing server")
 }
 
 func (s *Server) BrodcastHTMLClients(msgs ...string) {

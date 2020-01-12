@@ -2,7 +2,14 @@
 <div class="view" style="background-image: url('/static/roomhtml/Home.jpeg'); background-repeat: no-repeat; background-size: cover; background-position: center center;">
     <div class="row">
         <div style=" color:#000000; border: 4px solid 	#F5F5F5 ; border-radius: 25px;" class="col-md-12">
-            .col-md-12
+            <label for="Room name">Room Name</label>
+            <div class="text-right" id="online_led">
+                <img src="/static/roomhtml/OneLineRed.jpeg"  style="width: 3%; height: auto;" class="img-circle" alt="Responsive image"></img>
+            </div>
+            <div class="text-left" >
+                <u><h2 class='text-dark'>{{.RoomName}}</h2></u>
+            </div>
+            
         </div>
     </div>
     <div class="row">
@@ -107,6 +114,7 @@
             return sensorFmtLst[0] + style + sensorFmtLst[1] + val + sensorFmtLst[2];
         }
 
+        var online_led = $( "#online_led" );
        //Websocket connection
         if (window["WebSocket"]) {
             conn = new WebSocket("ws://" + document.location.host + "/ws");
@@ -123,6 +131,9 @@
                     case "update":   //                        text style            value
                         $("#"+ messages[2]).html(formatSensor(messages[3],messages[4]));
                         break;
+                    case "status":  //%s/status/OnLineGreen.jpeg
+                        online_led.html('<img src="/static/roomhtml/'+messages[2]+'" style="width: 3%; height: auto;" class="img-circle" alt="Responsive image"></img>');
+                        console.log("get status ");
                     default:
                         console.log("unknown action", action);                
                     }

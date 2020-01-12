@@ -60,11 +60,3 @@ func NewDevices(roomName string, roomCfg *config.Room) []Device {
 func UpdateMsg(roomName, deviceID, textStyle, value string) string {
 	return fmt.Sprintf(updateMsgFmt, roomName, deviceID, textStyle, value)
 }
-
-func ACMode(acID string) string {
-	return fmt.Sprintf("%s-mode", acID)
-}
-
-func ACTemp(acID string) string {
-	return fmt.Sprintf("%s-temp", acID)
-}

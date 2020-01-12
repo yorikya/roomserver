@@ -16,6 +16,7 @@ type Client struct {
 	LastSeen                time.Time
 	stats                   *statsd.Client
 	Devices                 []devices.Device
+	OnLine                  bool
 }
 
 func NewClient(clientID string, d ...devices.Device) *Client {
@@ -84,4 +85,8 @@ func (c *Client) GetIR_ac_aircool() devices.Device {
 
 func (c *Client) GetCamera2MP() devices.Device {
 	return c.GetDeviceByName(devices.Camera2MP)
+}
+
+func (c *Client) Close() {
+	log.Println("closing client", c.ClientID)
 }
