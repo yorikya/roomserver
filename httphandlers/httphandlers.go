@@ -64,7 +64,7 @@ func withServerAction(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 					fmt.Fprintln(w, err)
 					return
 				}
-
+				s.BrodcastHTMLClients(bcmsgs...)
 				url := fmt.Sprintf("http://%s/action?deviceid=%s&val=%s&cmd=%s", c.IPstr, deviceID, val, cmd)
 				log.Println("the client action url:", url)
 				res, err := http.Get(url)
@@ -79,7 +79,7 @@ func withServerAction(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 					fmt.Fprintln(w, err)
 					return
 				}
-				s.BrodcastHTMLClients(bcmsgs...)
+				//TODO:OPen after tests. s.BrodcastHTMLClients(bcmsgs...)
 				log.Println("the response from client", res)
 				return
 			}

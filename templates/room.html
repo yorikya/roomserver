@@ -1,5 +1,8 @@
 {{ template "header.html" . }}
 <div class="view" style="background-image: url('/static/roomhtml/Home.jpeg'); background-repeat: no-repeat; background-size: cover; background-position: center center;">
+    <div class="alert alert-primaryn" role="alert" id="alert_msg">
+        This is a primary alert—check it out!
+    </div>
     <div class="row">
         <div style=" color:#000000; border: 4px solid 	#F5F5F5 ; border-radius: 25px;" class="col-md-12">
             <label for="Room name">Room Name</label>
@@ -42,22 +45,17 @@
                 <div class="text-left" id="{{.RGBName}}">
                     {{.RGBStripHTML}}
                 </div>
-            </br>
-                <label for="RGBColor tag">RGB Tag</label>
-                <select class="form-control" id="rgb_strip">
-                    {{range .RGBOptions}}
-                        <option name="{{.}}">{{.}}</option>
-                    {{end}}
-                </select>
-                
                 </br>
-                </br> 
+                <label for="RGBColor tag">Colors</label>
                 <div class="text-left">
-                    <button onclick="sendRGB()" type="submit" class="btn btn-primary">Send</button>
+                    <div class="col-md-12">
+                        {{range .RGBOptions}}
+                            <button id="color-btn-{{.}}" type="submit" style="margin: 5px;" class="btn btn-primary">
+                                {{.}}
+                            </button>
+                        {{end}}
+                    </div>
                 </div>
-            </br> 
-            
-            </br>
         </div>
 
         <div style="color:#000000; border: 4px solid 	#F5F5F5; border-radius: 25px;" class="col-md-6">
@@ -150,24 +148,43 @@
             console.log("brouser npt accept web soccets");
         }
         
-        var rgb_strip = $( "#rgb_strip" );
         var ac_mode = $( "#ac_mode" );
-        var ac_temp = $( "#ac_temp" );
-
-        function sendRGB() {
-            var url = "/action?roomid={{.RoomID}}&deviceid={{.RGBName}}&action=" + rgb_strip.val();
-            $.get(url , function( data ) {
-                    // alert( "Data Loaded: " + data );
-            });
-            
-        }   
+        var ac_temp = $( "#ac_temp" ); 
 
         function sendAC() {
             var url = "/action?roomid={{.RoomID}}&deviceid={{.ACName}}&action=" + ac_mode.val()+"_"+ac_temp.val();
             $.get(url , function( data ) {
                     // alert( "Data Loaded: " + data );
             });
-            
         }   
+
+        $(document).ready(function() {
+            var url = "/action?roomid={{.RoomID}}&deviceid={{.RGBName}}&action=";
+            {{range .RGBOptions}}
+                $("#color-btn-{{.}}").click(function() {
+                    console.log("et click on: {{.}}");
+                    $.get(url + "{{.}}" , function( data ) {
+                            // alert( "Data Loaded: " + data );
+                           
+                            $('#alert_msg').text(data);
+                            // $('#alert_msg').show();
+                            $( "#alert_msg" ).slideUp( 300 ).delay( 800 ).fadeIn( 400 );
+                            
+                            function hide_popup(){
+                                $("#alert_msg").text("");
+                                $( "#alert_msg" ).hide();
+                    
+                            };
+                            window.setTimeout( hide_popup, 5000 ); // 5 seconds
+                           
+
+                    });
+                    
+                });
+            {{end}}
+
+            $('#alert_msg').hide();
+        });
+        
    </script>
 {{ template "footer.html" . }}
