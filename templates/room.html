@@ -4,7 +4,7 @@
         <div style=" color:#000000; border: 4px solid 	#F5F5F5 ; border-radius: 25px;" class="col-md-12">
             <label for="Room name">Room Name</label>
             <div class="text-right" id="online_led">
-                <img src="/static/roomhtml/OneLineRed.jpeg"  style="width: 3%; height: auto;" class="img-circle" alt="Responsive image"></img>
+                {{.OnlineStatusHTML}}
             </div>
             <div class="text-left" >
                 <u><h2 class='text-dark'>{{.RoomName}}</h2></u>

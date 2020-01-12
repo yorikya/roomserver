@@ -4,6 +4,7 @@ import "fmt"
 
 const (
 	H2Fmt         = "<h2 class='%s'>%s</h2>"
+	IMGFmt        = "<img src='/static/roomhtml/%s'  style='width: 3%%; height: auto;' class='img-circle' alt='Responsive image'></img>"
 	StylColGreen  = "green"
 	StylColRed    = "red"
 	StylColViolet = "violet"
@@ -50,6 +51,14 @@ func NewH2GreenSRedF(success bool, value string) string {
 		return NewH2(StylColGreen, value)
 	}
 	return NewH2(StylColRed, value)
+}
+
+func NewOnlineLedImg(onLine bool) string {
+	statusImg := "OnLineRed.jpeg"
+	if onLine {
+		statusImg = "OnLineGreen.jpeg"
+	}
+	return fmt.Sprintf(IMGFmt, statusImg)
 }
 
 func ACModeID(acID string) string {
