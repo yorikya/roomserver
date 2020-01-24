@@ -10,10 +10,12 @@
 const String roomID = "room1";
 const String clientID = String(roomID+ "_main");
 
-const String ssID     = "Danielle_2.4";         
-const String wifiPass = "0524713014";    
+//const String ssID     = "Danielle_2.4";         
+//const String wifiPass = "0524713014";    
+const String ssID     = "YuriIotLocal";         
+const String wifiPass = "12345678";    
 
-const String serverIP = "10.0.0.7:3000"; 
+const String serverIP = "192.168.123.125:3000"; //Server static IP
 const String clientInfo = "--- Client Info: --- \nClientID: " + clientID + ", WiFi SSID: " + ssID + ", Main Server IP: " + serverIP;
 
 //Process Sheduling
@@ -29,7 +31,7 @@ HTTPClient http;
 
 ESP8266WebServer server(80); //Server on port 80
 
-const uint16_t kIrLed = 4;  // ESP8266 GPIO pin to use. Recommended: 4 (D2).
+const uint16_t kIrLed = 4;  // D4
 int khz = 38; // 38kHz carrier frequency for the NEC protocol
 
 IRsend irsend(kIrLed);  // Set the GPIO to be used to sending the message.
@@ -46,12 +48,12 @@ String rgbColorStrip;
 //IR Air Code Air Cool
 String irACAirCool;
 
-#define RED_LED 5
-#define GREEN_LED 4
-#define BLUE_LED 0
+#define RED_LED 14  //D5
+#define GREEN_LED 12  //D6
+#define BLUE_LED 13  //D7
 
 #include <DHT.h>
-#define DHTPIN 5     // what pin we're connected to
+#define DHTPIN 5     // D3
 #define DHTTYPE DHT22   // DHT 22  (AM2302)
 
 DHT dht(DHTPIN, DHTTYPE, 11); //// Initialize DHT sensor for normal 16mhz Arduino
