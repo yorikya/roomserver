@@ -10,7 +10,7 @@
 const String roomID = "room1";
 const String clientID = String(roomID+ "_main");
 
-const String ssID     = "testYuir";         
+const String ssID     = "WIFI_ACCESS_POINT_NAME";         
 const String wifiPass = "WIFI_ACCESS_POINT_PASSWORD";    
 
 const String serverIP = "10.0.0.9:3000"; 
