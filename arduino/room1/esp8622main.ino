@@ -21,6 +21,7 @@ const String clientInfo = "--- Client Info: --- \nClientID: " + clientID + ", Wi
 //Process Sheduling
 unsigned long previousMillis = 0;
 const long clientDataInterval = 10000;
+const long openDoorInterval = 5000;
 
 //Client data
 StaticJsonDocument<512> clientData;
@@ -175,11 +176,16 @@ void snedIRACAirCool(String cmd) {
   delay(3000);
 }
 
-void handleAction() {
+#define DOOR_RELAY 16  //D2
+volatile byte relayState = LOW;
+
+
+void handleAction() { 
+  ///action?deviceid=rgbstrip&val=LUM_1900&cmd=10,255,0,50
   String id;
   String act;
   String val;
-  for (int i = 0; i < server.args(); i++) {
+  for (int i = 0; i < server.args(); i++) { 
     if (server.argName(i) == "deviceid") {
       id = server.arg(i);  
     } else if (server.argName(i) == "cmd") {
@@ -196,6 +202,13 @@ void handleAction() {
   } else if (id == "ir_ac_aircool") {
      irACAirCool = val;
      snedIRACAirCool(act);
+  }  else if (id == "door_main") {
+     if (act == "open") {
+       digitalWrite(DOOR_RELAY, HIGH);
+       relayState = HIGH;
+       logPrintln("open main door");
+
+     } 
   }
   String message = "action id: " + id + ", cmd: " + act;
   logPrintln(message);
@@ -213,6 +226,8 @@ void setup()
   pinMode(GREEN_LED, OUTPUT);
   pinMode(RED_LED, OUTPUT);
   pinMode(BLUE_LED, OUTPUT);
+
+  pinMode(DOOR_RELAY, OUTPUT);
 
   irsend.begin();
 
@@ -275,8 +290,16 @@ void loop()
     sendSensorData("dht_Humidity", String(dht.readHumidity()).c_str());
     sendSensorData("dht_Temperature", String(dht.readTemperature()).c_str());
     logPrintln("send dht_Humidity, dht_Temperature");
-       
-    } 
+    currentMillis = millis();  
+  } 
+  
+  
+  if (relayState == HIGH && (currentMillis - previousMillis >= openDoorInterval)) {
+    previousMillis = currentMillis;
+    digitalWrite(DOOR_RELAY, LOW);
+    logPrintln("release door relay");
+    relayState == LOW;
+  } 
   
 }
 

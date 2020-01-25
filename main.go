@@ -1,6 +1,6 @@
 package main
 
-//go:generate sed -i "s/WIFI_ACCESS_POINT_NAME/$WIFI_ACCESS_POINT_NAME/g" arduino/room1/esp8622main1.ino & sed -i "s/WIFI_ACCESS_POINT_PASSWORD/$WIFI_ACCESS_POINT_PASSWORD/g" arduino/room1/esp8622main1.ino
+//go:generate sed -i "s/WIFI_ACCESS_POINT_NAME/$WIFI_ACCESS_POINT_NAME/g" arduino/room1/esp8622main.ino & sed -i "s/WIFI_ACCESS_POINT_PASSWORD/$WIFI_ACCESS_POINT_PASSWORD/g" arduino/room1/esp8622main.ino
 
 import (
 	"fmt"
