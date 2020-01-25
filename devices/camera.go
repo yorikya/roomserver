@@ -14,6 +14,14 @@ type Camera struct {
 	value    float64
 }
 
+func (s *Camera) Shutble() bool {
+	return false
+}
+
+func (s *Camera) TurnOff() {
+
+}
+
 func (_ *Camera) InRangeThreshold() bool {
 	return false
 }

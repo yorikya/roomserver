@@ -51,6 +51,16 @@ func withServerAction(s *server.Server) func(w http.ResponseWriter, r *http.Requ
 				fmt.Fprintln(w, err)
 				return
 			}
+			if deviceID == "scenario" {
+				action, err := getURLParam(r, "action")
+				if err != nil {
+					log.Println(err)
+					fmt.Fprintln(w, err)
+					return
+				}
+				c.RunScenario(action)
+				return
+			}
 			if device := c.GetDeviceByName(deviceID); device != nil {
 				action, err := getURLParam(r, "action")
 				if err != nil {
@@ -132,6 +142,8 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 				DHTTemperture,
 				CameraID,
 				SensorFMT,
+				DoorID,
+				LightID,
 				DHTSensorHumudutyHTML,
 				DHTSensorTempertureHTML,
 				RGBStripHTML,
@@ -154,7 +166,9 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 				ACTempName:              style.ACTempID(c.GetIR_ac_aircool().GetName()),
 				DHTHumuditi:             c.GetDHTHumidity().GetName(),
 				DHTTemperture:           c.GetDHTTemperature().GetName(),
+				LightID:                 c.GetLight().GetName(),
 				CameraID:                clientCam.GetCamera2MP().GetName(),
+				DoorID:                  c.GetDoor().GetName(),
 				SensorFMT:               style.H2Fmt,
 				RoomID:                  mainRomm,
 				RoomName:                name,
@@ -187,6 +201,19 @@ func withServerRooms(s *server.Server) func(w http.ResponseWriter, r *http.Reque
 
 		err := templates.ExecuteTemplate(w, "rooms.html", s.GetRooms()) //execute the template and pass it the HomePageVars struct to fill in the gaps
 		if err != nil {                                                 // if there is an error
+			log.Print("template executing error: ", err) //log it
+		}
+
+	}
+}
+
+func withServerRemoteControl(s *server.Server) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		//TODO: Store connection
+		log.Printf("get remote control request: %+v\n", r)
+
+		err := templates.ExecuteTemplate(w, "remote.html", nil) //execute the template and pass it the HomePageVars struct to fill in the gaps
+		if err != nil {                                         // if there is an error
 			log.Print("template executing error: ", err) //log it
 		}
 
@@ -322,6 +349,7 @@ func InitRoutes(s *server.Server) {
 	http.HandleFunc("/rooms", withServerRooms(s))
 	http.HandleFunc("/room", withServerSelectRoom(s))
 	http.HandleFunc("/ws", withServerWS(s))
+	http.HandleFunc("/remot", withServerRemoteControl(s))
 
 	// This works and strip "/static/" fragment from path
 	fs := http.FileServer(http.Dir("static"))

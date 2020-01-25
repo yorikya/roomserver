@@ -4,6 +4,8 @@
         "name": "room1_main",
         "devices": [ 
           {"name":"rgbstrip", "sensor":"rgb"},
+          {"name":"door", "sensor":"main"},
+          {"name":"light", "sensor":"main"},
           {"name":"ir_ac_aircool", "sensor":"ir"},
           {"name":"dht_Humidity", "sensor":"Humidity", "threshold":40.0},
           {"name":"dht_Temperature", "sensor":"Temperature", "threshold":23.0}

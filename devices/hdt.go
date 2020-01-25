@@ -23,6 +23,14 @@ func (s *HDTSensor) InRangeThreshold() bool {
 	return false
 }
 
+func (s *HDTSensor) Shutble() bool {
+	return false
+}
+
+func (s *HDTSensor) TurnOff() {
+
+}
+
 func (_ *HDTSensor) CreateCMD(cmd string) (string, string, []string, error) {
 	return cmd, CUSTOM, []string{}, nil
 }

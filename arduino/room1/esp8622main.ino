@@ -202,7 +202,7 @@ void handleAction() {
   } else if (id == "ir_ac_aircool") {
      irACAirCool = val;
      snedIRACAirCool(act);
-  }  else if (id == "door_main") {
+  }  else if (id == "door") {
      if (act == "open") {
        digitalWrite(DOOR_RELAY, HIGH);
        relayState = HIGH;

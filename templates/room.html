@@ -4,7 +4,7 @@
         This is a primary alert—check it out!
     </div>
     <div class="row">
-        <div style=" color:#000000; border: 4px solid 	#F5F5F5 ; border-radius: 25px;" class="col-md-12">
+        <div style=" color:#000000; border: 4px solid 	#F5F5F5 ; border-radius: 25px;" class="col-md-6">
             <label for="Room name">Room Name</label>
             <div class="text-right" id="online_led">
                 {{.OnlineStatusHTML}}
@@ -13,6 +13,23 @@
                 <u><h2 class='text-dark'>{{.RoomName}}</h2></u>
             </div>
             
+        </div>
+        <div style=" color:#000000; border: 4px solid 	#F5F5F5 ; border-radius: 25px;" class="col-md-6">
+            <label for="Room name">Quick Control</label>
+        </br>
+            <button onclick="openDoor()" type="submit" style="margin: 5px;" class="btn btn-primary">
+                Open Door
+            </button>
+            <button onclick="lightOn()" type="submit" style="margin: 5px;" class="btn btn-primary">
+                Light On 
+            </button>
+            <button onclick="lighOff()" type="submit" style="margin: 5px;" class="btn btn-primary">
+                Light Off 
+            </button>
+        </br>
+            <button onclick="shutDownAll()" type="submit" style="margin: 5px;" class="btn btn-primary">
+                Shut Down All
+            </button>
         </div>
     </div>
     <div class="row">
@@ -110,7 +127,7 @@
         function formatSensor(style, val) {
             var sensorFmtLst = "{{.SensorFMT}}".split("%s");  //"<h2 class='%s'>%s</h2>"
             return sensorFmtLst[0] + style + sensorFmtLst[1] + val + sensorFmtLst[2];
-        }
+        };
 
         var online_led = $( "#online_led" );
        //Websocket connection
@@ -156,7 +173,35 @@
             $.get(url , function( data ) {
                     // alert( "Data Loaded: " + data );
             });
-        }   
+        };   
+
+        function shutDownAll(){
+            var url = "/action?roomid={{.RoomID}}&deviceid=scenario&action=shutdownall";
+            $.get(url , function( data ) {
+                    // alert( "Data Loaded: " + data );
+            });
+        };
+
+        function openDoor(){
+            var url = "/action?roomid={{.RoomID}}&deviceid={{.DoorID}}&action=open";
+            $.get(url , function( data ) {
+                    // alert( "Data Loaded: " + data );
+            });
+        };
+
+        function lighOff(){
+            var url = "/action?roomid={{.RoomID}}&deviceid={{.LightID}}&action=off";
+            $.get(url , function( data ) {
+                    // alert( "Data Loaded: " + data );
+            });
+        };
+
+        function lightOn(){
+            var url = "/action?roomid={{.RoomID}}&deviceid={{.LightID}}&action=on";
+            $.get(url , function( data ) {
+                    // alert( "Data Loaded: " + data );
+            });
+        };
 
         $(document).ready(function() {
             var url = "/action?roomid={{.RoomID}}&deviceid={{.RGBName}}&action=";

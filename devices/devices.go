@@ -24,6 +24,12 @@ const (
 
 	//Video camera
 	Camera2MP = "camera"
+
+	//Main Door
+	Door = "door"
+
+	//Main Light
+	Light = "light"
 )
 
 type Device interface {
@@ -36,6 +42,8 @@ type Device interface {
 	SetValue(string) error
 	CreateCMD(string) (string, string, []string, error)
 	SendStats(*statsd.Client)
+	Shutble() bool
+	TurnOff()
 }
 
 func NewDevices(roomName string, roomCfg *config.Room) []Device {
@@ -52,6 +60,10 @@ func NewDevices(roomName string, roomCfg *config.Room) []Device {
 			sens = append(sens, NewIRACAirCool(roomName, device.Sensor))
 		case Camera2MP:
 			sens = append(sens, NewCamera(roomName, device.Sensor))
+		case Door:
+			sens = append(sens, NewDoor(roomName, device.Sensor))
+		case Light:
+			sens = append(sens, NewLight(roomName, device.Sensor))
 		}
 	}
 	return sens

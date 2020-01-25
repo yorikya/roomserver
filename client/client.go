@@ -67,6 +67,16 @@ func (c *Client) GetDeviceByName(name string) devices.Device {
 	return nil
 }
 
+func (c *Client) RunScenario(scenario string) {
+	if scenario == "shutdownall" {
+		for _, d := range c.Devices {
+			if d.Shutble() {
+				d.TurnOff()
+			}
+		}
+	}
+}
+
 func (c *Client) GetDHTHumidity() devices.Device {
 	return c.GetDeviceByName(devices.DHT_Humidity)
 }
@@ -85,6 +95,14 @@ func (c *Client) GetIR_ac_aircool() devices.Device {
 
 func (c *Client) GetCamera2MP() devices.Device {
 	return c.GetDeviceByName(devices.Camera2MP)
+}
+
+func (c *Client) GetDoor() devices.Device {
+	return c.GetDeviceByName(devices.Door)
+}
+
+func (c *Client) GetLight() devices.Device {
+	return c.GetDeviceByName(devices.Light)
 }
 
 func (c *Client) Close() {
