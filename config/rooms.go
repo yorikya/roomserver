@@ -13,8 +13,9 @@ type Device struct {
 }
 
 type Room struct {
-	Name    string   `json:"name"`
-	Devices []Device `json:"devices"`
+	Name            string   `json:"name"`
+	Devices         []Device `json:"devices"`
+	ShutDownDevices []string `json:"shutDownDevices"`
 }
 
 type Rooms struct {

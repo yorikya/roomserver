@@ -23,10 +23,6 @@ func (s *HDTSensor) InRangeThreshold() bool {
 	return false
 }
 
-func (s *HDTSensor) Shutble() bool {
-	return false
-}
-
 func (s *HDTSensor) TurnOff() {
 
 }

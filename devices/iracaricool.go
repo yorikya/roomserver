@@ -205,10 +205,6 @@ func (_ *IRACAirCool) InRangeThreshold() bool {
 	return false
 }
 
-func (s *IRACAirCool) Shutble() bool {
-	return true
-}
-
 func (s *IRACAirCool) TurnOff() {
 	log.Println("IRACAirCool turn off")
 }

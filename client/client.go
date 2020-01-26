@@ -17,15 +17,17 @@ type Client struct {
 	stats                   *statsd.Client
 	Devices                 []devices.Device
 	OnLine                  bool
+	shutDownDevices         []string
 }
 
-func NewClient(clientID string, d ...devices.Device) *Client {
+func NewClient(clientID string, shutDownDevices []string, d ...devices.Device) *Client {
 	log.Printf("Create a new client '%s'\n", clientID)
 	return &Client{
-		roomID:   strings.Split(clientID, "_")[0],
-		Devices:  d,
-		ClientID: clientID,
-		stats:    statsd.NewClient("localhost:8125", statsd.MaxPacketSize(1400), statsd.MetricPrefix(fmt.Sprintf("home.%s.", clientID))),
+		shutDownDevices: shutDownDevices,
+		roomID:          strings.Split(clientID, "_")[0],
+		Devices:         d,
+		ClientID:        clientID,
+		stats:           statsd.NewClient("localhost:8125", statsd.MaxPacketSize(1400), statsd.MetricPrefix(fmt.Sprintf("home.%s.", clientID))),
 	}
 }
 
@@ -67,10 +69,19 @@ func (c *Client) GetDeviceByName(name string) devices.Device {
 	return nil
 }
 
+func (c *Client) isShutDownDevice(name string) bool {
+	for _, d := range c.shutDownDevices {
+		if d == name {
+			return true
+		}
+	}
+	return false
+}
+
 func (c *Client) RunScenario(scenario string) {
 	if scenario == "shutdownall" {
 		for _, d := range c.Devices {
-			if d.Shutble() {
+			if c.isShutDownDevice(d.GetName()) {
 				d.TurnOff()
 			}
 		}

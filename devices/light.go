@@ -19,10 +19,6 @@ func (_ *MainLight) InRangeThreshold() bool {
 	return false
 }
 
-func (s *MainLight) Shutble() bool {
-	return true
-}
-
 func (s *MainLight) TurnOff() {
 	log.Println("MainLight turn off")
 }

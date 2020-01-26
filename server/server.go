@@ -60,7 +60,7 @@ func NewServer(configPath string) *Server {
 			log.Printf("dosen't have config for '%s'", room.Name)
 			continue
 		}
-		s.clients[room.Name] = client.NewClient(room.Name, devices.NewDevices(room.Name, roomCfg)...)
+		s.clients[room.Name] = client.NewClient(room.Name, roomCfg.ShutDownDevices, devices.NewDevices(room.Name, roomCfg)...)
 
 		log.Printf("client: %s was added, data: %+v\n", room.Name, s.clients[room.Name])
 	}

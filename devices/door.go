@@ -18,10 +18,6 @@ func (_ *MainDoor) InRangeThreshold() bool {
 	return false
 }
 
-func (s *MainDoor) Shutble() bool {
-	return false
-}
-
 func (s *MainDoor) TurnOff() {
 
 }

@@ -14,10 +14,6 @@ type Camera struct {
 	value    float64
 }
 
-func (s *Camera) Shutble() bool {
-	return false
-}
-
 func (s *Camera) TurnOff() {
 
 }

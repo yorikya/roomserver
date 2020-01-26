@@ -42,7 +42,6 @@ type Device interface {
 	SetValue(string) error
 	CreateCMD(string) (string, string, []string, error)
 	SendStats(*statsd.Client)
-	Shutble() bool
 	TurnOff()
 }
 

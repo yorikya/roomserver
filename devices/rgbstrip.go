@@ -101,10 +101,6 @@ func (_ *RGBStrip) InRangeThreshold() bool {
 	return false
 }
 
-func (s *RGBStrip) Shutble() bool {
-	return true
-}
-
 func (s *RGBStrip) TurnOff() {
 	log.Println("RGBStrip turn off")
 }

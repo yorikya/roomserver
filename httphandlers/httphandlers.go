@@ -132,7 +132,7 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 			clientCam := s.GetClient(camroom)
 			if clientCam == nil {
 				log.Printf("room '%s' does not have cammera (%s), init default camera", name, camroom)
-				clientCam = client.NewClient(camroom, devices.NewCamera(camroom, devices.Camera2MP))
+				clientCam = client.NewClient(camroom, []string{}, devices.NewCamera(camroom, devices.Camera2MP))
 			}
 			ac := strings.Split(c.GetIR_ac_aircool().GetValueStr(), ",")
 			d := struct {
@@ -147,8 +147,8 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 				DHTSensorHumudutyHTML,
 				DHTSensorTempertureHTML,
 				RGBStripHTML,
-				ACModeHTML,
-				ACTempHTML,
+				ACModeVal,
+				ACTempVal,
 				OnlineStatusHTML,
 				CameraStatus,
 				ACName,
@@ -176,8 +176,8 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 				DHTSensorHumudutyHTML:   style.NewH2GreenSRedF(c.GetDHTHumidity().InRangeThreshold(), c.GetDHTHumidity().GetValueStr()),
 				DHTSensorTempertureHTML: style.NewH2GreenSRedF(c.GetDHTTemperature().InRangeThreshold(), c.GetDHTTemperature().GetValueStr()),
 				RGBStripHTML:            style.NewH2(style.StylColBlack, c.GetRGBstrip().GetValueStr()),
-				ACModeHTML:              style.NewH2(style.StylColBlack, ac[0]),
-				ACTempHTML:              style.NewH2(style.StylColBlack, ac[1]),
+				ACModeVal:               ac[0],
+				ACTempVal:               ac[1],
 				ACModeOptions:           c.GetIR_ac_aircool().GetOptions("mode"),
 				ACTempertureOptions:     c.GetIR_ac_aircool().GetOptions("temp"),
 				RGBOptions:              c.GetRGBstrip().GetOptions(""),

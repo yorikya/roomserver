@@ -77,35 +77,30 @@
 
         <div style="color:#000000; border: 4px solid 	#F5F5F5; border-radius: 25px;" class="col-md-6">
             <div class="text-center"><u><h1>Air Conditioner</h1></u></div>
-            </br>
-
-            <label for="ACMode">Mode</label>
-            <div class="text-left" id="{{.ACModeName}}">
-                {{.ACModeHTML}}
-            </div>
-
-            <label for="ACTemp">Temp</label>
-            <div class="text-left" id="{{.ACTempName}}">
-                {{.ACTempHTML}}
-            </div>
 
             </br>
 
             <label for="AC mode">Mode</label>
-            <select class="form-control" id="ac_mode">
+        </br>
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
                 {{range .ACModeOptions}}
-                    <option name="{{.}}">{{.}}</option>
+                    <label class="btn btn-secondary active">
+                        <input type="radio" name="options" id="ac-mode-btn-{{.}}" autocomplete="off">{{.}}
+                    </label>
                 {{end}}
-            </select>
+            </div>
+           
             </br>
+        </br>
             <label for="AC temp" >Temp</label>
-            <select class="form-control" id="ac_temp">
-                {{range .ACTempertureOptions}}
-                    <option name="{{.}}">{{.}}</option>
-                {{end}}
-            </select>
+            <h2 class="text-left" id="demo"></h2>
+            
+            <div class="slidecontainer">
+                <input type="range" min="16" max="32" value="{{.ACTempVal}}" class="slider" id="myRange">
+            </div>
+
             </br>
-                <button onclick="sendAC()" type="submit" class="btn btn-primary">Send</button>
+               
         </div>
     </div>
 
@@ -128,6 +123,15 @@
             var sensorFmtLst = "{{.SensorFMT}}".split("%s");  //"<h2 class='%s'>%s</h2>"
             return sensorFmtLst[0] + style + sensorFmtLst[1] + val + sensorFmtLst[2];
         };
+
+        var slider = document.getElementById("myRange");
+        var output = document.getElementById("demo");
+        output.innerHTML = slider.value; // Display the default slider value
+
+        // Update the current slider value (each time you drag the slider handle)
+        slider.oninput = function() {
+        output.innerHTML = this.value;
+        }
 
         var online_led = $( "#online_led" );
        //Websocket connection

@@ -9,7 +9,8 @@
           {"name":"ir_ac_aircool", "sensor":"ir"},
           {"name":"dht_Humidity", "sensor":"Humidity", "threshold":40.0},
           {"name":"dht_Temperature", "sensor":"Temperature", "threshold":23.0}
-         ]
+         ],
+         "shutDownDevices": ["rgbstrip", "light", "ir_ac_aircool"]
       },
       {
         "name": "room1_cam",
