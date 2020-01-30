@@ -149,6 +149,8 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 				RGBStripHTML,
 				ACModeVal,
 				ACTempVal,
+				ACHighTemp,
+				ACLowTemp,
 				OnlineStatusHTML,
 				CameraStatus,
 				ACName,
@@ -180,6 +182,8 @@ func withServerSelectRoom(s *server.Server) func(w http.ResponseWriter, r *http.
 				ACTempVal:               ac[1],
 				ACModeOptions:           c.GetIR_ac_aircool().GetOptions("mode"),
 				ACTempertureOptions:     c.GetIR_ac_aircool().GetOptions("temp"),
+				ACLowTemp:               c.GetIR_ac_aircool().GetOptions("lowTemp")[0],
+				ACHighTemp:              c.GetIR_ac_aircool().GetOptions("highTemp")[0],
 				RGBOptions:              c.GetRGBstrip().GetOptions(""),
 				CameraStatus:            style.NewH2GreenSRedF(clientCam.GetCamera2MP().InRangeThreshold(), clientCam.GetCamera2MP().GetValueStr()),
 			}

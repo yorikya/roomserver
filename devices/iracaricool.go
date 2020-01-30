@@ -286,6 +286,10 @@ func (s *IRACAirCool) GetOptions(str string) []string {
 		}
 		sort.Strings(temps)
 		return temps
+	case "highTemp":
+		return []string{"32"}
+	case "lowTemp":
+		return []string{"16"}
 	}
 	return []string{}
 }

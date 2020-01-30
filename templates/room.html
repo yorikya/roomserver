@@ -85,7 +85,7 @@
             <div class="btn-group btn-group-toggle" data-toggle="buttons">
                 {{range .ACModeOptions}}
                     <label class="btn btn-secondary active">
-                        <input type="radio" name="options" id="ac-mode-btn-{{.}}" autocomplete="off">{{.}}
+                        <input type="radio" name="options" id="ac-mode-btn-{{.}}" autocomplete="off">{{.}}</input>
                     </label>
                 {{end}}
             </div>
@@ -93,12 +93,14 @@
             </br>
         </br>
             <label for="AC temp" >Temp</label>
-            <h2 class="text-left" id="demo"></h2>
+            <h2 class="text-left" id="ac-temperture-val"></h2>
             
             <div class="slidecontainer">
-                <input type="range" min="16" max="32" value="{{.ACTempVal}}" class="slider" id="myRange">
-            </div>
-
+                <input type="range" min="{{.ACLowTemp}}" max="{{.ACHighTemp}}" value="{{.ACTempVal}}" class="slider" id="ac-temperture-range">
+            </div>  
+            <button onclick="sendACcmd()"  type="submit" style="margin: 5px;" class="btn btn-primary">
+                Send
+            </button>
             </br>
                
         </div>
@@ -124,13 +126,13 @@
             return sensorFmtLst[0] + style + sensorFmtLst[1] + val + sensorFmtLst[2];
         };
 
-        var slider = document.getElementById("myRange");
-        var output = document.getElementById("demo");
-        output.innerHTML = slider.value; // Display the default slider value
+        var acTempSlider = document.getElementById("ac-temperture-range");
+        var acTempVal = document.getElementById("ac-temperture-val");
+        acTempVal.innerHTML = acTempSlider.value; // Display the default slider value
 
         // Update the current slider value (each time you drag the slider handle)
-        slider.oninput = function() {
-        output.innerHTML = this.value;
+        acTempSlider.oninput = function() {
+            acTempVal.innerHTML = this.value;
         }
 
         var online_led = $( "#online_led" );
@@ -179,6 +181,13 @@
             });
         };   
 
+        function sendACcmd() {
+            var url = "/action?roomid={{.RoomID}}&deviceid={{.ACName}}&action=" + ac_mode.val()+"_"+acTempSlider.value;
+                $.get(url , function( data ) {
+                        // alert( "Data Loaded: " + data );
+                });
+        };
+
         function shutDownAll(){
             var url = "/action?roomid={{.RoomID}}&deviceid=scenario&action=shutdownall";
             $.get(url , function( data ) {
@@ -208,6 +217,13 @@
         };
 
         $(document).ready(function() {
+            {{range .ACModeOptions}}
+                $("#ac-mode-btn-{{.}}").focus(function() {
+                    console.log("et click on: {{.}}");
+                });
+            {{end}}
+            
+
             var url = "/action?roomid={{.RoomID}}&deviceid={{.RGBName}}&action=";
             {{range .RGBOptions}}
                 $("#color-btn-{{.}}").click(function() {
