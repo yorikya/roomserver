@@ -4,6 +4,8 @@ Smart Home Project, based on Arduino/ESP8622 devices (clients)
 This project has a few components for Smart Home, based those components you a build smart home with a cheap Arduino/ESP8622 
 devices.
 
+![Room](room.html.png)
+
 ## Content
 * Client - Arduino/ESP8622 device which communicates with the server and introduces a single room
 * Server - Server is written in Golang, accept room clients view and control them, rendering HTML for clients. 
