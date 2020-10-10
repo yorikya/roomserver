@@ -82,10 +82,10 @@
 
             <label for="AC mode">Mode</label>
         </br>
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <div class="btn-group btn-group-toggle" data-toggle="buttons" id="ac_mode">
                 {{range .ACModeOptions}}
                     <label class="btn btn-secondary active">
-                        <input type="radio" name="options" id="ac-mode-btn-{{.}}" autocomplete="off">{{.}}</input>
+                        <input type="radio" name="ac_mode_option" value="{{.}}" autocomplete="off">{{.}}</input>
                     </label>
                 {{end}}
             </div>
@@ -171,18 +171,10 @@
             console.log("brouser npt accept web soccets");
         }
         
-        var ac_mode = $( "#ac_mode" );
-        var ac_temp = $( "#ac_temp" ); 
-
-        function sendAC() {
-            var url = "/action?roomid={{.RoomID}}&deviceid={{.ACName}}&action=" + ac_mode.val()+"_"+ac_temp.val();
-            $.get(url , function( data ) {
-                    // alert( "Data Loaded: " + data );
-            });
-        };   
 
         function sendACcmd() {
-            var url = "/action?roomid={{.RoomID}}&deviceid={{.ACName}}&action=" + ac_mode.val()+"_"+acTempSlider.value;
+            console.log("the input value" , $('input[name=ac_mode_option]:checked', '#ac_mode').val());
+            var url = "/action?roomid={{.RoomID}}&deviceid={{.ACName}}&action=" + $('input[name=ac_mode_option]:checked', '#ac_mode').val()+"_"+acTempSlider.value;
                 $.get(url , function( data ) {
                         // alert( "Data Loaded: " + data );
                 });

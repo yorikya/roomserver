@@ -9,9 +9,7 @@
 //Client Data
 const String roomID = "room1";
 const String clientID = String(roomID+ "_main");
-
-//const String ssID     = "Danielle_2.4";         
-//const String wifiPass = "0524713014";    
+  
 const String ssID     = "YuriIotLocal";         
 const String wifiPass = "12345678";    
 
@@ -176,8 +174,8 @@ void snedIRACAirCool(String cmd) {
   delay(3000);
 }
 
-#define DOOR_RELAY 16  //D2
-volatile byte relayState = LOW;
+int DOOR_RELAY = 16; //D2
+bool doorOpen = false;
 
 
 void handleAction() { 
@@ -205,10 +203,10 @@ void handleAction() {
   }  else if (id == "door") {
      if (act == "open") {
        digitalWrite(DOOR_RELAY, HIGH);
-       relayState = HIGH;
+       doorOpen = true;
        logPrintln("open main door");
 
-     } 
+     }  
   }
   String message = "action id: " + id + ", cmd: " + act;
   logPrintln(message);
@@ -294,11 +292,11 @@ void loop()
   } 
   
   
-  if (relayState == HIGH && (currentMillis - previousMillis >= openDoorInterval)) {
+  if (doorOpen == true && (currentMillis - previousMillis >= openDoorInterval)) {
     previousMillis = currentMillis;
     digitalWrite(DOOR_RELAY, LOW);
     logPrintln("release door relay");
-    relayState == LOW;
+    doorOpen = false;
   } 
   
 }
